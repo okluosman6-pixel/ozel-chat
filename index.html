@@ -68,6 +68,8 @@
 
     .btn-primary { padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
     .btn-primary:hover { background: #1d4ed8; }
+    .btn-danger { padding: 6px 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; }
+    .btn-danger:hover { background: #ef4444; color: white; }
 
     /* 2. ANA SOHBET ALANI */
     .main-chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0e14; }
@@ -77,12 +79,24 @@
     .header-actions i:hover { color: #fff; }
 
     .messages-container { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-    .message-row { display: flex; flex-direction: column; max-width: 60%; }
+    .message-row { display: flex; flex-direction: column; max-width: 65%; position: relative; }
     .message-row.mine { align-self: flex-end; }
     .message-row.other { align-self: flex-start; }
+    
+    .message-content-wrapper { display: flex; align-items: flex-end; gap: 8px; }
+    .message-row.mine .message-content-wrapper { flex-direction: row-reverse; }
+
     .bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
     .message-row.mine .bubble { background: #2563eb; color: white; border-bottom-right-radius: 4px; }
     .message-row.other .bubble { background: #1e2430; color: #e1e7ed; border-bottom-left-radius: 4px; }
+    
+    /* MESAJ İÇİNDEKİ İŞLEMLER (KOPYALA - SİL) */
+    .msg-actions { display: flex; gap: 6px; opacity: 0; transition: 0.2s; background: #151921; border: 1px solid #232936; padding: 4px 8px; border-radius: 8px; }
+    .message-row:hover .msg-actions { opacity: 1; }
+    .msg-action-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; padding: 2px; }
+    .msg-action-btn:hover { color: #3b82f6; }
+    .msg-action-btn.delete:hover { color: #ef4444; }
+
     .time-stamp { font-size: 10px; color: #64748b; margin-top: 4px; align-self: flex-end; }
 
     .chat-input-bar { padding: 20px; background: #151921; border-top: 1px solid #1e2430; display: flex; align-items: center; gap: 12px; }
@@ -233,7 +247,21 @@
     <section class="content-panel" id="panel-settings">
       <div class="panel-title">Ayarlar</div>
 
-      <!-- BİLDİRİM SESLERİ (AÇMA/KAPAMA ŞALTERİ + 10 TARZ + DOSYA YÜKLEME) -->
+      <!-- ÇÖP KUTUSU / SİLİNEN MESAJLAR -->
+      <div class="settings-card" style="cursor:default; border-color: #ef4444;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="font-weight: bold; color: #ef4444; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-trash-can"></i> Çöp Kutusu (Silinen Mesajlar)
+          </div>
+          <button class="btn-danger" onclick="clearTrashBin()" style="font-size: 11px; padding: 4px 8px;">Çöpü Temizle</button>
+        </div>
+        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Sohbetlerden sildiğin mesajlar burada hangi odadan silindikleriyle birlikte saklanır.</div>
+        <div id="trash-bin-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
+          <!-- Dinamik dolacak -->
+        </div>
+      </div>
+
+      <!-- BİLDİRİM SESLERİ -->
       <div class="settings-card">
         <div class="settings-header">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -246,8 +274,6 @@
           <i class="fa-solid fa-chevron-down" onclick="toggleSoundSelect()" style="cursor: pointer; padding: 5px;"></i>
         </div>
         <div class="sound-select-box" id="sound-select-box">
-          
-          <!-- KENDİ SES DOSYANI YÜKLEME KUTUCUĞU -->
           <div class="form-group" style="background: rgba(59, 130, 246, 0.05); padding: 10px; border-radius: 8px; border: 1px solid #1e2430;">
             <label style="color: #3b82f6; font-weight: bold;"><i class="fa-solid fa-cloud-arrow-up"></i> Özel Ses Dosyası Yükle (.mp3 / .wav):</label>
             <input type="file" id="custom-audio-file" accept="audio/*" onchange="handleCustomAudioUpload(event)">
@@ -292,7 +318,7 @@
         <button class="btn-primary" onclick="updatePassword()">Şifreyi Güncelle</button>
       </div>
 
-      <!-- ADMIN ÖZEL PANELİ (ŞİFRE SIFIRLAMA) -->
+      <!-- ADMIN ÖZEL PANELİ -->
       <div class="settings-card" id="admin-panel-card" style="display:none; cursor:default; border-color:#2563eb;">
         <div style="font-weight:bold; color:#3b82f6; margin-bottom:12px;"><i class="fa-solid fa-user-shield" style="margin-right:8px;"></i> Admin Şifre Sıfırlama Paneli</div>
         <div class="form-group">
@@ -394,13 +420,12 @@
 
     function previewSound(val) {
       selectedSoundType = parseInt(val);
-      customAudioDataUrl = null; // Hazır sese geçince özel sesi sıfırla
+      customAudioDataUrl = null;
       localStorage.removeItem('custom_audio_file');
       document.getElementById('custom-audio-info').style.display = 'none';
       playNotificationSound();
     }
 
-    // KULLANICININ KENDİ SES DOSYASINI YÜKLEMESİ
     function handleCustomAudioUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -414,16 +439,14 @@
         info.textContent = `Yüklendi: ${file.name}`;
         info.style.display = 'block';
 
-        playNotificationSound(); // Yükler yüklemez test et
+        playNotificationSound();
       };
       reader.readAsDataURL(file);
     }
 
-    // BİLDİRİM SESİ OYNATICI (Özel Dosya veya 10 Farklı Hazır Tarz)
     function playNotificationSound() {
       if (!soundEnabled) return;
 
-      // Eğer kullanıcı kendi ses dosyasını yüklediyse onu çal
       if (customAudioDataUrl) {
         try {
           const audio = new Audio(customAudioDataUrl);
@@ -434,7 +457,6 @@
         return;
       }
 
-      // Aksi halde seçilen 10 farklı hazır tarzı sentezle
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const now = audioCtx.currentTime;
@@ -557,6 +579,8 @@
         document.getElementById('custom-audio-info').style.display = 'block';
       }
 
+      renderTrashBinPanel();
+
       const adminCard = document.getElementById('admin-panel-card');
       if (currentUser === 'admin') {
         adminCard.style.display = 'block';
@@ -571,6 +595,86 @@
       } else {
         adminCard.style.display = 'none';
       }
+    }
+
+    // ÇÖP KUTUSU YÖNETİMİ
+    function renderTrashBinPanel() {
+      const container = document.getElementById('trash-bin-container');
+      const trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
+      
+      if (trash.length === 0) {
+        container.innerHTML = `<div style="font-size: 12px; color: #64748b; text-align: center; padding: 10px;">Çöp kutunuz boş.</div>`;
+        return;
+      }
+
+      let html = '';
+      trash.forEach((item, index) => {
+        let roomLabel = item.chatRoom === 'genel' ? 'Genel Sohbet' : `${item.chatRoom.toUpperCase()} ile Özel Sohbet`;
+        html += `
+          <div style="background: #0b0e14; border: 1px solid #1e2430; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 11px; color: #3b82f6; font-weight: bold; margin-bottom: 2px;">📁 ${roomLabel} (${item.sender.toUpperCase()})</div>
+              <div style="font-size: 13px; color: #e1e7ed;">${escapeHtml(item.text)}</div>
+              <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Silinme: ${item.time}</div>
+            </div>
+            <button onclick="restoreMessage(${index})" class="btn-primary" style="font-size: 11px; padding: 4px 8px;" title="Geri Yükle"><i class="fa-solid fa-rotate-left"></i></button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function clearTrashBin() {
+      localStorage.removeItem('app_trash_bin');
+      renderTrashBinPanel();
+    }
+
+    function restoreMessage(index) {
+      let trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
+      const item = trash[index];
+      if (!item) return;
+
+      // İlgili sohbete geri ekle
+      let messages = JSON.parse(localStorage.getItem(item.storageKey) || '[]');
+      messages.push({ user: item.sender, text: item.text, time: item.time });
+      localStorage.setItem(item.storageKey, JSON.stringify(messages));
+
+      // Çöpten sil
+      trash.splice(index, 1);
+      localStorage.setItem('app_trash_bin', JSON.stringify(trash));
+
+      renderTrashBinPanel();
+      loadMessages();
+    }
+
+    function deleteMessage(index) {
+      const key = getStorageKeyFor(activeTarget);
+      let messages = JSON.parse(localStorage.getItem(key) || '[]');
+      const deletedMsg = messages.splice(index, 1)[0];
+      localStorage.setItem(key, JSON.stringify(messages));
+
+      // Çöp kutusuna kaydet
+      if (deletedMsg) {
+        let trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
+        trash.unshift({
+          text: deletedMsg.text,
+          sender: deletedMsg.user,
+          chatRoom: activeTarget,
+          storageKey: key,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        localStorage.setItem('app_trash_bin', JSON.stringify(trash));
+      }
+
+      loadMessages();
+    }
+
+    function copyMessageText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Mesaj panoya kopyalandı!");
+      }).catch(err => {
+        console.log("Kopyalama başarısız:", err);
+      });
     }
 
     function updateDisplayName() {
@@ -894,11 +998,17 @@
       lastSeenMsgCount[key] = messages.length;
 
       let html = '';
-      messages.forEach(msg => {
+      messages.forEach((msg, index) => {
         const isMine = msg.user === currentUser;
         html += `
           <div class="message-row ${isMine ? 'mine' : 'other'}">
-            <div class="bubble">${escapeHtml(msg.text)}</div>
+            <div class="message-content-wrapper">
+              <div class="bubble">${escapeHtml(msg.text)}</div>
+              <div class="msg-actions">
+                <button class="msg-action-btn" onclick="copyMessageText('${escapeHtml(msg.text).replace(/'/g, "\\'")}')" title="Kopyala"><i class="fa-regular fa-copy"></i></button>
+                <button class="msg-action-btn delete" onclick="deleteMessage(${index})" title="Sil (Çöp Kutusuna Gönder)"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
+            </div>
             <div class="time-stamp">${msg.user.toUpperCase()} • ${msg.time}</div>
           </div>
         `;
