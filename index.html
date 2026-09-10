@@ -111,8 +111,8 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>Özel Sohbet Girişi</h2>
-      <input type="text" id="username-input" placeholder="Kullanıcı Adı">
-      <input type="password" id="password-input" placeholder="Şifre">
+      <input type="text" id="username-input" placeholder="Kullanıcı Adı" onkeydown="if(event.key==='Enter') login()">
+      <input type="password" id="password-input" placeholder="Şifre" onkeydown="if(event.key==='Enter') login()">
       <button onclick="login()">Giriş Yap</button>
       <p id="error-msg">Hatalı kullanıcı adı veya şifre!</p>
     </div>
@@ -210,8 +210,8 @@
 
     let currentUser = "";
     let activeTarget = "genel";
-    let unreadCounts = {}; // { "mehmet": 2, "ayse": 1 } gibi okunmamış sayıları tutar
-    let lastSeenMsgCount = {}; // Her oda için son görülen mesaj sayısı
+    let unreadCounts = {};
+    let lastSeenMsgCount = {};
     let toastSenderTarget = "";
 
     function playNotificationSound() {
@@ -221,8 +221,8 @@
         const gain = audioCtx.createGain();
         
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 notası
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5 notası
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
 
         gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
@@ -274,7 +274,6 @@
         renderUserList();
         selectChat('genel');
 
-        // Arka planda mesaj takibi yap
         setInterval(checkNewMessages, 1000);
       } else {
         document.getElementById('error-msg').style.display = 'block';
@@ -287,7 +286,7 @@
 
     function selectChat(targetUser) {
       activeTarget = targetUser;
-      unreadCounts[targetUser] = 0; // Sıfırla
+      unreadCounts[targetUser] = 0;
 
       const headerAvatar = document.getElementById('chat-header-avatar');
       const headerName = document.getElementById('chat-header-name');
@@ -390,10 +389,8 @@
     }
 
     function checkNewMessages() {
-      // 1. Aktif ekranı güncelle
       loadMessages();
 
-      // 2. Diğer tüm kullanıcıları/odaları denetle
       const targets = ['genel', ...Object.keys(ALLOWED_USERS).filter(u => u !== currentUser)];
 
       targets.forEach(target => {
@@ -403,7 +400,6 @@
 
         if (msgs.length > prevCount) {
           const lastMsg = msgs[msgs.length - 1];
-          // Mesajı atan biz değilsek ve o an o kullanıcı ile mesajlaşmıyorsak
           if (lastMsg.user !== currentUser && target !== activeTarget) {
             unreadCounts[target] = (unreadCounts[target] || 0) + (msgs.length - prevCount);
             showNotification(lastMsg.user, lastMsg.text);
