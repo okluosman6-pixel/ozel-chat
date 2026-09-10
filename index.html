@@ -132,71 +132,6 @@
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
     .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
 
-    /* AHMET İÇİN AÇILIR MENÜ (HOVER VE TIKLAMA DESTEKLİ) */
-    .ahmet-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 20px;
-      right: 20px;
-      background: #11151c;
-      border: 1px solid #3b82f6;
-      border-radius: 10px;
-      padding: 12px;
-      z-index: 99;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-      text-align: center;
-      animation: fadeInDropdown 0.2s ease-in-out;
-    }
-    .chat-item.ahmet-user-item:hover .ahmet-dropdown,
-    .generic-list-item.ahmet-contact-item:hover .ahmet-dropdown,
-    .chat-item.ahmet-user-item.force-open .ahmet-dropdown,
-    .generic-list-item.ahmet-contact-item.force-open .ahmet-dropdown {
-      display: block;
-    }
-    @keyframes fadeInDropdown {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .ahmet-qr-img {
-      width: 100px;
-      height: 100px;
-      border-radius: 8px;
-      object-fit: cover;
-      margin-bottom: 8px;
-      border: 1px solid #232936;
-    }
-    .ahmet-link-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #0b0e14;
-      border: 1px solid #232936;
-      padding: 6px 10px;
-      border-radius: 6px;
-      gap: 8px;
-    }
-    .ahmet-url-text {
-      font-size: 10px;
-      color: #94a3b8;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: left;
-    }
-    .ahmet-copy-btn {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 11px;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: 0.2s;
-    }
-    .ahmet-copy-btn:hover { background: #1d4ed8; }
-
     .generic-list-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; position: relative; }
     .generic-list-item i { font-size: 24px; color: #3b82f6; }
 
@@ -213,7 +148,7 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>Özel Sohbet Girişi</h2>
-      <input type="text" id="username-input" placeholder="Kullanıcı Adı (örn: ahmet)" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
+      <input type="text" id="username-input" placeholder="Kullanıcı Adı (örn: baris)" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
       <input type="password" id="password-input" placeholder="Şifre" onkeydown="if(event.key==='Enter') login()">
       <button onclick="login()">Giriş Yap</button>
       <p id="error-msg">Hatalı kullanıcı adı veya şifre!</p>
@@ -225,7 +160,7 @@
     
     <!-- TOAST BİLDİRİMİ -->
     <div id="notification-toast" onclick="clickNotification()">
-      <div class="toast-avatar" id="toast-avatar">A</div>
+      <div class="toast-avatar" id="toast-avatar">B</div>
       <div class="toast-content">
         <div class="toast-title" id="toast-title">Yeni Mesaj</div>
         <div class="toast-body" id="toast-body">Mesaj içeriği...</div>
@@ -417,9 +352,8 @@
 
   <script>
     const DEFAULT_USERS = {
-      "ahmet": "1234",
-      "mehmet": "5678",
-      "ayse": "1111",
+      "baris alp": "1234",
+      "batuhan tarran": "5678",
       "admin": "ozelsifre"
     };
 
@@ -613,20 +547,6 @@
       navigator.clipboard.writeText(text).then(() => alert("Mesaj panoya kopyalandı!"));
     }
 
-    function copyAhmetInstagramLink(event, url) {
-      event.stopPropagation();
-      navigator.clipboard.writeText(url).then(() => {
-        alert("Instagram bağlantısı panoya kopyalandı!");
-      });
-    }
-
-    function toggleAhmetMenu(elementId) {
-      const el = document.getElementById(elementId);
-      if (el) {
-        el.classList.toggle('force-open');
-      }
-    }
-
     function updateDisplayName() {
       const name = document.getElementById('setting-display-name').value.trim();
       if (name) alert("Adınız güncellendi!");
@@ -680,41 +600,19 @@
       const container = document.getElementById('contacts-list-container');
       let html = '';
       const users = getUsers();
-      const igUrl = "https://www.instagram.com/alpbaris17?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
-
+      
       Object.keys(users).forEach(user => {
         if (user !== currentUser) {
           let online = isUserOnline(user);
-          
-          if (user === 'ahmet') {
-            html += `
-              <div class="generic-list-item ahmet-contact-item" id="contact-ahmet-item" style="cursor:pointer;" onclick="toggleAhmetMenu('contact-ahmet-item')">
-                <i class="fa-solid fa-circle-user"></i>
-                <div style="flex:1;">
-                  <div style="font-weight: bold;">AHMET</div>
-                  <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
-                </div>
-
-                <div class="ahmet-dropdown" onclick="event.stopPropagation()">
-                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img">
-                  <div class="ahmet-link-box">
-                    <span class="ahmet-url-text" title="${igUrl}">alpbaris17 Instagram</span>
-                    <button class="ahmet-copy-btn" onclick="copyAhmetInstagramLink(event, '${igUrl}')"><i class="fa-regular fa-copy"></i></button>
-                  </div>
-                </div>
+          html += `
+            <div class="generic-list-item" onclick="switchTab('chat'); selectChat('${user}');" style="cursor:pointer;">
+              <i class="fa-solid fa-circle-user"></i>
+              <div style="flex:1;">
+                <div style="font-weight: bold;">${user.toUpperCase()}</div>
+                <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
               </div>
-            `;
-          } else {
-            html += `
-              <div class="generic-list-item" onclick="switchTab('chat'); selectChat('${user}');" style="cursor:pointer;">
-                <i class="fa-solid fa-circle-user"></i>
-                <div>
-                  <div style="font-weight: bold;">${user.toUpperCase()}</div>
-                  <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
-                </div>
-              </div>
-            `;
-          }
+            </div>
+          `;
         }
       });
       container.innerHTML = html;
@@ -834,7 +732,6 @@
     function renderUserList() {
       const container = document.getElementById('users-list');
       const users = getUsers();
-      const igUrl = "https://www.instagram.com/alpbaris17?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
       
       let genelUnread = unreadCounts['genel'] || 0;
       let html = `
@@ -853,43 +750,19 @@
           let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
           
-          if (user === 'ahmet') {
-            html += `
-              <div class="chat-item ahmet-user-item ${activeTarget === user ? 'active' : ''}" id="sidebar-ahmet-item" onclick="toggleAhmetMenu('sidebar-ahmet-item')">
-                <div class="chat-item-avatar">
-                  A
-                  <div class="status-dot ${online ? 'online' : 'offline'}"></div>
-                </div>
-                <div class="chat-item-info">
-                  <div class="chat-item-name">AHMET</div>
-                  <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
-                </div>
-                ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
-
-                <div class="ahmet-dropdown" onclick="event.stopPropagation()">
-                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img">
-                  <div class="ahmet-link-box">
-                    <span class="ahmet-url-text" title="${igUrl}">alpbaris17 Instagram</span>
-                    <button class="ahmet-copy-btn" onclick="copyAhmetInstagramLink(event, '${igUrl}')"><i class="fa-regular fa-copy"></i></button>
-                  </div>
-                </div>
+          html += `
+            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
+              <div class="chat-item-avatar">
+                ${user.charAt(0).toUpperCase()}
+                <div class="status-dot ${online ? 'online' : 'offline'}"></div>
               </div>
-            `;
-          } else {
-            html += `
-              <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
-                <div class="chat-item-avatar">
-                  ${user.charAt(0).toUpperCase()}
-                  <div class="status-dot ${online ? 'online' : 'offline'}"></div>
-                </div>
-                <div class="chat-item-info">
-                  <div class="chat-item-name">${user.toUpperCase()}</div>
-                  <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
-                </div>
-                ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
+              <div class="chat-item-info">
+                <div class="chat-item-name">${user.toUpperCase()}</div>
+                <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
               </div>
-            `;
-          }
+              ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
+            </div>
+          `;
         }
       });
       container.innerHTML = html;
