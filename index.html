@@ -19,7 +19,7 @@
     #error-msg { color: #ef4444; font-size: 13px; margin-top: 12px; display: none; }
 
     /* UYGULAMA ARAYÜZÜ */
-    #app-container { display: none; height: 100vh; width: 100vw; }
+    #app-container { display: none; height: 100vh; width: 100vw; position: relative; }
     
     /* 1. SOL DAR MENÜ */
     .nav-sidebar { width: 70px; background: #10141d; border-right: 1px solid #1e2430; display: flex; flex-direction: column; align-items: center; padding: 20px 0; justify-content: space-between; }
@@ -66,13 +66,43 @@
     .chat-list-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .chat-list-header { padding: 16px 20px; border-bottom: 1px solid #1e2430; font-size: 16px; font-weight: 600; background: #11151c; }
     .chat-list { overflow-y: auto; flex: 1; }
-    .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; }
+    .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; position: relative; }
     .chat-item:hover, .chat-item.active { background: #1e2430; }
     .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; }
     .status-dot { width: 9px; height: 9px; background: #22c55e; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
     .chat-item-info { flex: 1; overflow: hidden; }
     .chat-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
+    
+    /* OKUNMAMIŞ MESAJ ROZETİ */
+    .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
+
+    /* SAĞ ÜST BİLDİRİM (TOAST) */
+    #notification-toast {
+      position: absolute;
+      top: 20px;
+      right: 340px;
+      background: #151921;
+      border: 1px solid #3b82f6;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      z-index: 1000;
+      cursor: pointer;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-avatar { width: 36px; height: 36px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .toast-content { display: flex; flex-direction: column; }
+    .toast-title { font-size: 13px; font-weight: bold; color: #fff; }
+    .toast-body { font-size: 12px; color: #94a3b8; margin-top: 2px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
 <body>
@@ -90,6 +120,16 @@
 
   <!-- UYGULAMA ANA ALANI -->
   <div id="app-container">
+    
+    <!-- ÜST POP-UP BİLDİRİM KARTI -->
+    <div id="notification-toast" onclick="clickNotification()">
+      <div class="toast-avatar" id="toast-avatar">A</div>
+      <div class="toast-content">
+        <div class="toast-title" id="toast-title">Yeni Mesaj</div>
+        <div class="toast-body" id="toast-body">Mesaj içeriği...</div>
+      </div>
+    </div>
+
     <!-- 1. SOL NAVİGASYON -->
     <nav class="nav-sidebar">
       <div>
@@ -170,6 +210,55 @@
 
     let currentUser = "";
     let activeTarget = "genel";
+    let unreadCounts = {}; // { "mehmet": 2, "ayse": 1 } gibi okunmamış sayıları tutar
+    let lastSeenMsgCount = {}; // Her oda için son görülen mesaj sayısı
+    let toastSenderTarget = "";
+
+    function playNotificationSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 notası
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5 notası
+
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {
+        console.log("Ses çalınamadı:", e);
+      }
+    }
+
+    function showNotification(sender, text) {
+      toastSenderTarget = sender;
+      document.getElementById('toast-avatar').textContent = sender.charAt(0).toUpperCase();
+      document.getElementById('toast-title').textContent = sender.toUpperCase() + " yeni bir mesaj gönderdi";
+      document.getElementById('toast-body').textContent = text;
+      
+      const toast = document.getElementById('notification-toast');
+      toast.style.display = 'flex';
+      
+      playNotificationSound();
+
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+
+    function clickNotification() {
+      if (toastSenderTarget) {
+        selectChat(toastSenderTarget);
+        document.getElementById('notification-toast').style.display = 'none';
+      }
+    }
 
     function login() {
       const u = document.getElementById('username-input').value.toLowerCase().trim();
@@ -185,7 +274,8 @@
         renderUserList();
         selectChat('genel');
 
-        setInterval(loadMessages, 1000);
+        // Arka planda mesaj takibi yap
+        setInterval(checkNewMessages, 1000);
       } else {
         document.getElementById('error-msg').style.display = 'block';
       }
@@ -197,6 +287,7 @@
 
     function selectChat(targetUser) {
       activeTarget = targetUser;
+      unreadCounts[targetUser] = 0; // Sıfırla
 
       const headerAvatar = document.getElementById('chat-header-avatar');
       const headerName = document.getElementById('chat-header-name');
@@ -223,6 +314,10 @@
         profileUsername.textContent = '@' + targetUser;
       }
 
+      const key = getStorageKeyFor(targetUser);
+      let msgs = JSON.parse(localStorage.getItem(key) || '[]');
+      lastSeenMsgCount[key] = msgs.length;
+
       renderUserList();
       loadMessages();
     }
@@ -230,6 +325,7 @@
     function renderUserList() {
       const container = document.getElementById('users-list');
       
+      let genelUnread = unreadCounts['genel'] || 0;
       let html = `
         <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
           <div class="chat-item-avatar">
@@ -240,11 +336,13 @@
             <div class="chat-item-name">GENEL SOHBET</div>
             <div class="chat-item-lastmsg">Herkes</div>
           </div>
+          ${genelUnread > 0 ? `<div class="unread-badge">${genelUnread}</div>` : ''}
         </div>
       `;
 
       Object.keys(ALLOWED_USERS).forEach(user => {
         if (user !== currentUser) {
+          let count = unreadCounts[user] || 0;
           html += `
             <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="selectChat('${user}')">
               <div class="chat-item-avatar">
@@ -255,6 +353,7 @@
                 <div class="chat-item-name">${user.toUpperCase()}</div>
                 <div class="chat-item-lastmsg">Çevrimiçi</div>
               </div>
+              ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
             </div>
           `;
         }
@@ -263,9 +362,9 @@
       container.innerHTML = html;
     }
 
-    function getStorageKey() {
-      if (activeTarget === 'genel') return 'chat_genel';
-      const pair = [currentUser, activeTarget].sort().join('_');
+    function getStorageKeyFor(target) {
+      if (target === 'genel') return 'chat_genel';
+      const pair = [currentUser, target].sort().join('_');
       return 'chat_' + pair;
     }
 
@@ -278,21 +377,50 @@
       const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 
       const msgData = { user: currentUser, text: text, time: timeStr };
-      const key = getStorageKey();
+      const key = getStorageKeyFor(activeTarget);
 
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
       messages.push(msgData);
       localStorage.setItem(key, JSON.stringify(messages));
 
+      lastSeenMsgCount[key] = messages.length;
+
       input.value = '';
       loadMessages();
     }
 
+    function checkNewMessages() {
+      // 1. Aktif ekranı güncelle
+      loadMessages();
+
+      // 2. Diğer tüm kullanıcıları/odaları denetle
+      const targets = ['genel', ...Object.keys(ALLOWED_USERS).filter(u => u !== currentUser)];
+
+      targets.forEach(target => {
+        const key = getStorageKeyFor(target);
+        let msgs = JSON.parse(localStorage.getItem(key) || '[]');
+        let prevCount = lastSeenMsgCount[key] || 0;
+
+        if (msgs.length > prevCount) {
+          const lastMsg = msgs[msgs.length - 1];
+          // Mesajı atan biz değilsek ve o an o kullanıcı ile mesajlaşmıyorsak
+          if (lastMsg.user !== currentUser && target !== activeTarget) {
+            unreadCounts[target] = (unreadCounts[target] || 0) + (msgs.length - prevCount);
+            showNotification(lastMsg.user, lastMsg.text);
+            renderUserList();
+          }
+          lastSeenMsgCount[key] = msgs.length;
+        }
+      });
+    }
+
     function loadMessages() {
       const list = document.getElementById('message-list');
-      const key = getStorageKey();
+      const key = getStorageKeyFor(activeTarget);
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
       
+      lastSeenMsgCount[key] = messages.length;
+
       let html = '';
       messages.forEach(msg => {
         const isMine = msg.user === currentUser;
