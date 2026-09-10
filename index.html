@@ -69,7 +69,12 @@
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; position: relative; }
     .chat-item:hover, .chat-item.active { background: #1e2430; }
     .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; }
-    .status-dot { width: 9px; height: 9px; background: #22c55e; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
+    
+    /* DURUM NOKTALARI */
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
+    .status-dot.online { background: #22c55e; }
+    .status-dot.offline { background: #64748b; }
+
     .chat-item-info { flex: 1; overflow: hidden; }
     .chat-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
@@ -151,7 +156,7 @@
           <div class="chat-item-avatar" id="chat-header-avatar">G</div>
           <div>
             <div style="font-weight: 600;" id="chat-header-name">Genel Sohbet Odası</div>
-            <div style="font-size: 12px; color: #22c55e;">● Çevrimiçi</div>
+            <div style="font-size: 12px;" id="chat-header-status">● Yükleniyor...</div>
           </div>
         </div>
         <div class="header-actions">
@@ -179,7 +184,7 @@
       <div class="profile-card-large">
         <div class="profile-avatar-large" id="profile-avatar-big">?</div>
         <h3 id="profile-name-big" style="font-size: 16px;">Kullanıcı</h3>
-        <span style="font-size: 11px; color: #22c55e;">● Çevrimiçi</span>
+        <span style="font-size: 11px;" id="profile-status-text">● Çevrim Dışı</span>
 
         <div class="profile-info-section">
           <div>
@@ -213,6 +218,30 @@
     let unreadCounts = {};
     let lastSeenMsgCount = {};
     let toastSenderTarget = "";
+
+    // KALBİN ATMA HIZI (ÇEVRİM İÇİ SİNYALİ)
+    function updateHeartbeat() {
+      if (!currentUser) return;
+      const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
+      onlineData[currentUser] = Date.now();
+      localStorage.setItem('online_users', JSON.stringify(onlineData));
+    }
+
+    function isUserOnline(username) {
+      const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
+      const lastSeen = onlineData[username];
+      if (!lastSeen) return false;
+      // Son 10 saniye içinde sinyal vermişse çevrim içi say
+      return (Date.now() - lastSeen) < 10000;
+    }
+
+    function getOnlineUserCount() {
+      let count = 0;
+      Object.keys(ALLOWED_USERS).forEach(user => {
+        if (isUserOnline(user)) count++;
+      });
+      return count;
+    }
 
     function playNotificationSound() {
       try {
@@ -271,6 +300,9 @@
         
         document.getElementById('nav-user-avatar').textContent = u.charAt(0).toUpperCase();
 
+        updateHeartbeat();
+        setInterval(updateHeartbeat, 3000);
+
         renderUserList();
         selectChat('genel');
 
@@ -281,44 +313,71 @@
     }
 
     function logout() {
+      if (currentUser) {
+        const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
+        delete onlineData[currentUser];
+        localStorage.setItem('online_users', JSON.stringify(onlineData));
+      }
       location.reload();
     }
+
+    window.addEventListener('beforeunload', () => {
+      if (currentUser) {
+        const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
+        delete onlineData[currentUser];
+        localStorage.setItem('online_users', JSON.stringify(onlineData));
+      }
+    });
 
     function selectChat(targetUser) {
       activeTarget = targetUser;
       unreadCounts[targetUser] = 0;
 
-      const headerAvatar = document.getElementById('chat-header-avatar');
-      const headerName = document.getElementById('chat-header-name');
-
-      if (targetUser === 'genel') {
-        headerAvatar.textContent = 'G';
-        headerName.textContent = 'Genel Sohbet Odası';
-      } else {
-        headerAvatar.textContent = targetUser.charAt(0).toUpperCase();
-        headerName.textContent = targetUser.toUpperCase() + ' ile Özel Sohbet';
-      }
-
-      const profileAvatar = document.getElementById('profile-avatar-big');
-      const profileName = document.getElementById('profile-name-big');
-      const profileUsername = document.getElementById('profile-username-val');
-
-      if (targetUser === 'genel') {
-        profileAvatar.textContent = currentUser.charAt(0).toUpperCase();
-        profileName.textContent = currentUser.toUpperCase();
-        profileUsername.textContent = '@' + currentUser;
-      } else {
-        profileAvatar.textContent = targetUser.charAt(0).toUpperCase();
-        profileName.textContent = targetUser.toUpperCase();
-        profileUsername.textContent = '@' + targetUser;
-      }
+      updateHeaderAndProfile();
+      renderUserList();
 
       const key = getStorageKeyFor(targetUser);
       let msgs = JSON.parse(localStorage.getItem(key) || '[]');
       lastSeenMsgCount[key] = msgs.length;
 
-      renderUserList();
       loadMessages();
+    }
+
+    function updateHeaderAndProfile() {
+      const headerAvatar = document.getElementById('chat-header-avatar');
+      const headerName = document.getElementById('chat-header-name');
+      const headerStatus = document.getElementById('chat-header-status');
+
+      const profileAvatar = document.getElementById('profile-avatar-big');
+      const profileName = document.getElementById('profile-name-big');
+      const profileUsername = document.getElementById('profile-username-val');
+      const profileStatus = document.getElementById('profile-status-text');
+
+      if (activeTarget === 'genel') {
+        const onlineCount = getOnlineUserCount();
+        headerAvatar.textContent = 'G';
+        headerName.textContent = 'Genel Sohbet Odası';
+        headerStatus.innerHTML = `<span style="color: #22c55e;">● ${onlineCount} Kullanıcı Çevrim İçi</span>`;
+
+        profileAvatar.textContent = currentUser.charAt(0).toUpperCase();
+        profileName.textContent = currentUser.toUpperCase();
+        profileUsername.textContent = '@' + currentUser;
+        profileStatus.innerHTML = `<span style="color: #22c55e;">● Çevrim İçi</span>`;
+      } else {
+        const online = isUserOnline(activeTarget);
+        headerAvatar.textContent = activeTarget.charAt(0).toUpperCase();
+        headerName.textContent = activeTarget.toUpperCase() + ' ile Özel Sohbet';
+        headerStatus.innerHTML = online 
+          ? `<span style="color: #22c55e;">● Çevrim İçi</span>` 
+          : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
+
+        profileAvatar.textContent = activeTarget.charAt(0).toUpperCase();
+        profileName.textContent = activeTarget.toUpperCase();
+        profileUsername.textContent = '@' + activeTarget;
+        profileStatus.innerHTML = online 
+          ? `<span style="color: #22c55e;">● Çevrim İçi</span>` 
+          : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
+      }
     }
 
     function renderUserList() {
@@ -329,11 +388,11 @@
         <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
           <div class="chat-item-avatar">
             G
-            <div class="status-dot"></div>
+            <div class="status-dot online"></div>
           </div>
           <div class="chat-item-info">
             <div class="chat-item-name">GENEL SOHBET</div>
-            <div class="chat-item-lastmsg">Herkes</div>
+            <div class="chat-item-lastmsg">${getOnlineUserCount()} kişi aktif</div>
           </div>
           ${genelUnread > 0 ? `<div class="unread-badge">${genelUnread}</div>` : ''}
         </div>
@@ -342,15 +401,16 @@
       Object.keys(ALLOWED_USERS).forEach(user => {
         if (user !== currentUser) {
           let count = unreadCounts[user] || 0;
+          let online = isUserOnline(user);
           html += `
             <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="selectChat('${user}')">
               <div class="chat-item-avatar">
                 ${user.charAt(0).toUpperCase()}
-                <div class="status-dot"></div>
+                <div class="status-dot ${online ? 'online' : 'offline'}"></div>
               </div>
               <div class="chat-item-info">
                 <div class="chat-item-name">${user.toUpperCase()}</div>
-                <div class="chat-item-lastmsg">Çevrimiçi</div>
+                <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
               </div>
               ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
             </div>
@@ -389,6 +449,8 @@
     }
 
     function checkNewMessages() {
+      updateHeaderAndProfile();
+      renderUserList();
       loadMessages();
 
       const targets = ['genel', ...Object.keys(ALLOWED_USERS).filter(u => u !== currentUser)];
