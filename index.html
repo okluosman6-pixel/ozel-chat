@@ -90,7 +90,6 @@
     .message-row.mine .bubble { background: #2563eb; color: white; border-bottom-right-radius: 4px; }
     .message-row.other .bubble { background: #1e2430; color: #e1e7ed; border-bottom-left-radius: 4px; }
     
-    /* MESAJ İÇİNDEKİ İŞLEMLER (KOPYALA - SİL) */
     .msg-actions { display: flex; gap: 6px; opacity: 0; transition: 0.2s; background: #151921; border: 1px solid #232936; padding: 4px 8px; border-radius: 8px; }
     .message-row:hover .msg-actions { opacity: 1; }
     .msg-action-btn { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; padding: 2px; }
@@ -118,8 +117,11 @@
     .chat-list-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .chat-list-header { padding: 16px 20px; border-bottom: 1px solid #1e2430; font-size: 16px; font-weight: 600; background: #11151c; }
     .chat-list { overflow-y: auto; flex: 1; }
+    
+    /* CHAT ITEM VE BARIŞ ALP ÖZEL HOVER SEGME YAPISI */
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; position: relative; }
     .chat-item:hover, .chat-item.active { background: #1e2430; }
+    
     .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; }
     
     .status-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
@@ -130,6 +132,68 @@
     .chat-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
     .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
+
+    /* BARIŞ ALP HOVER SEGME (POP-DOWN) STİLİ */
+    .baris-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 20px;
+      right: 20px;
+      background: #11151c;
+      border: 1px solid #3b82f6;
+      border-radius: 10px;
+      padding: 12px;
+      z-index: 99;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+      text-align: center;
+      animation: fadeInDropdown 0.2s ease-in-out;
+    }
+    .chat-item.baris-user-item:hover .baris-dropdown {
+      display: block;
+    }
+    @keyframes fadeInDropdown {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .baris-qr-img {
+      width: 110px;
+      height: 110px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-bottom: 8px;
+      border: 1px solid #232936;
+    }
+    .baris-link-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0b0e14;
+      border: 1px solid #232936;
+      padding: 6px 10px;
+      border-radius: 6px;
+      gap: 8px;
+    }
+    .baris-url-text {
+      font-size: 10px;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+    .baris-copy-btn {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: 0.2s;
+    }
+    .baris-copy-btn:hover { background: #1d4ed8; }
 
     .generic-list-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; }
     .generic-list-item i { font-size: 24px; color: #3b82f6; }
@@ -247,7 +311,6 @@
     <section class="content-panel" id="panel-settings">
       <div class="panel-title">Ayarlar</div>
 
-      <!-- ÇÖP KUTUSU / SİLİNEN MESAJLAR -->
       <div class="settings-card" style="cursor:default; border-color: #ef4444;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
           <div style="font-weight: bold; color: #ef4444; display: flex; align-items: center; gap: 8px;">
@@ -256,12 +319,9 @@
           <button class="btn-danger" onclick="clearTrashBin()" style="font-size: 11px; padding: 4px 8px;">Çöpü Temizle</button>
         </div>
         <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Sohbetlerden sildiğin mesajlar burada hangi odadan silindikleriyle birlikte saklanır.</div>
-        <div id="trash-bin-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
-          <!-- Dinamik dolacak -->
-        </div>
+        <div id="trash-bin-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;"></div>
       </div>
 
-      <!-- BİLDİRİM SESLERİ -->
       <div class="settings-card">
         <div class="settings-header">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -298,7 +358,6 @@
         </div>
       </div>
 
-      <!-- AD / PROFİL DEĞİŞTİRME -->
       <div class="settings-card" style="cursor:default;">
         <div style="font-weight:bold; margin-bottom:12px;"><i class="fa-solid fa-id-card" style="margin-right:8px; color:#3b82f6;"></i> Adını Değiştir</div>
         <div class="form-group">
@@ -308,7 +367,6 @@
         <button class="btn-primary" onclick="updateDisplayName()">Adı Güncelle</button>
       </div>
 
-      <!-- ŞİFRE DEĞİŞTİRME -->
       <div class="settings-card" style="cursor:default;">
         <div style="font-weight:bold; margin-bottom:12px;"><i class="fa-solid fa-key" style="margin-right:8px; color:#3b82f6;"></i> Şifreni Değiştir</div>
         <div class="form-group">
@@ -318,7 +376,6 @@
         <button class="btn-primary" onclick="updatePassword()">Şifreyi Güncelle</button>
       </div>
 
-      <!-- ADMIN ÖZEL PANELİ -->
       <div class="settings-card" id="admin-panel-card" style="display:none; cursor:default; border-color:#2563eb;">
         <div style="font-weight:bold; color:#3b82f6; margin-bottom:12px;"><i class="fa-solid fa-user-shield" style="margin-right:8px;"></i> Admin Şifre Sıfırlama Paneli</div>
         <div class="form-group">
@@ -596,7 +653,6 @@
       }
     }
 
-    // ÇÖP KUTUSU YÖNETİMİ
     function renderTrashBinPanel() {
       const container = document.getElementById('trash-bin-container');
       const trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
@@ -668,6 +724,15 @@
     function copyMessageText(text) {
       navigator.clipboard.writeText(text).then(() => {
         alert("Mesaj panoya kopyalandı!");
+      }).catch(err => {
+        console.log("Kopyalama başarısız:", err);
+      });
+    }
+
+    function copyBarisInstagramLink(event, url) {
+      event.stopPropagation();
+      navigator.clipboard.writeText(url).then(() => {
+        alert("Instagram bağlantısı panoya kopyalandı!");
       }).catch(err => {
         console.log("Kopyalama başarısız:", err);
       });
@@ -915,23 +980,58 @@
         if (user !== currentUser) {
           let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
-          html += `
-            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
-              <div class="chat-item-avatar">
-                ${user.charAt(0).toUpperCase()}
-                <div class="status-dot ${online ? 'online' : 'offline'}"></div>
+          
+          if (user === 'barış alp') {
+            const igUrl = "https://www.instagram.com/alpbaris17?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
+            // Barış Alp satırına özel hover segme (dropdown) eklendi
+            html += `
+              <div class="chat-item baris-user-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
+                <div class="chat-item-avatar">
+                  ${user.charAt(0).toUpperCase()}
+                  <div class="status-dot ${online ? 'online' : 'offline'}"></div>
+                </div>
+                <div class="chat-item-info">
+                  <div class="chat-item-name">${user.toUpperCase()}</div>
+                  <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
+                </div>
+                ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
+
+                <!-- AÇILIR SEGME (POP-DOWN) -->
+                <div class="baris-dropdown" onclick="event.stopPropagation()">
+                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Baris Alp QR" class="baris-qr-img" id="baris-qr-element">
+                  <div class="baris-link-box">
+                    <span class="baris-url-text" title="${igUrl}">alpbaris17 Instagram</span>
+                    <button class="baris-copy-btn" onclick="copyBarisInstagramLink(event, '${igUrl}')" title="Bağlantıyı Kopyala"><i class="fa-regular fa-copy"></i></button>
+                  </div>
+                </div>
               </div>
-              <div class="chat-item-info">
-                <div class="chat-item-name">${user.toUpperCase()}</div>
-                <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
+            `;
+          } else {
+            html += `
+              <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
+                <div class="chat-item-avatar">
+                  ${user.charAt(0).toUpperCase()}
+                  <div class="status-dot ${online ? 'online' : 'offline'}"></div>
+                </div>
+                <div class="chat-item-info">
+                  <div class="chat-item-name">${user.toUpperCase()}</div>
+                  <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
+                </div>
+                ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
               </div>
-              ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
-            </div>
-          `;
+            `;
+          }
         }
       });
 
       container.innerHTML = html;
+      
+      // Sağladığın görselin data-url bağlamı
+      const qrEl = document.getElementById('baris-qr-element');
+      if (qrEl) {
+        // Görsel verisini doğrudan kaynak olarak atıyoruz
+        qrEl.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; 
+      }
     }
 
     function getStorageKeyFor(target) {
