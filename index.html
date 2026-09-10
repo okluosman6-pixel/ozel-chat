@@ -132,7 +132,7 @@
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
     .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
 
-    /* AHMET İÇİN HOVER SEGME (POP-DOWN) STİLİ */
+    /* AHMET İÇİN AÇILIR MENÜ (HOVER VE TIKLAMA DESTEKLİ) */
     .ahmet-dropdown {
       display: none;
       position: absolute;
@@ -149,7 +149,9 @@
       animation: fadeInDropdown 0.2s ease-in-out;
     }
     .chat-item.ahmet-user-item:hover .ahmet-dropdown,
-    .generic-list-item.ahmet-contact-item:hover .ahmet-dropdown {
+    .generic-list-item.ahmet-contact-item:hover .ahmet-dropdown,
+    .chat-item.ahmet-user-item.force-open .ahmet-dropdown,
+    .generic-list-item.ahmet-contact-item.force-open .ahmet-dropdown {
       display: block;
     }
     @keyframes fadeInDropdown {
@@ -618,6 +620,13 @@
       });
     }
 
+    function toggleAhmetMenu(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.classList.toggle('force-open');
+      }
+    }
+
     function updateDisplayName() {
       const name = document.getElementById('setting-display-name').value.trim();
       if (name) alert("Adınız güncellendi!");
@@ -678,18 +687,16 @@
           let online = isUserOnline(user);
           
           if (user === 'ahmet') {
-            // KİŞİLER PANELİNDE AHMET ÜZERİNE GELİNDİĞİNDE ÇIKACAK ÖZEL YAPI
             html += `
-              <div class="generic-list-item ahmet-contact-item" style="cursor:pointer;" onclick="switchTab('chat'); selectChat('${user}');">
+              <div class="generic-list-item ahmet-contact-item" id="contact-ahmet-item" style="cursor:pointer;" onclick="toggleAhmetMenu('contact-ahmet-item')">
                 <i class="fa-solid fa-circle-user"></i>
-                <div>
-                  <div style="font-weight: bold;">${user.toUpperCase()}</div>
+                <div style="flex:1;">
+                  <div style="font-weight: bold;">AHMET</div>
                   <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
                 </div>
 
-                <!-- AHMET İÇİN AÇILIR KİŞİ MENÜSÜ -->
                 <div class="ahmet-dropdown" onclick="event.stopPropagation()">
-                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img" id="ahmet-qr-contact">
+                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img">
                   <div class="ahmet-link-box">
                     <span class="ahmet-url-text" title="${igUrl}">alpbaris17 Instagram</span>
                     <button class="ahmet-copy-btn" onclick="copyAhmetInstagramLink(event, '${igUrl}')"><i class="fa-regular fa-copy"></i></button>
@@ -847,20 +854,18 @@
           let online = isUserOnline(user);
           
           if (user === 'ahmet') {
-            // AHMET İÇİN SAĞ LİSTEDE HOVER AÇILIR MENÜ
             html += `
-              <div class="chat-item ahmet-user-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
+              <div class="chat-item ahmet-user-item ${activeTarget === user ? 'active' : ''}" id="sidebar-ahmet-item" onclick="toggleAhmetMenu('sidebar-ahmet-item')">
                 <div class="chat-item-avatar">
-                  ${user.charAt(0).toUpperCase()}
+                  A
                   <div class="status-dot ${online ? 'online' : 'offline'}"></div>
                 </div>
                 <div class="chat-item-info">
-                  <div class="chat-item-name">${user.toUpperCase()}</div>
+                  <div class="chat-item-name">AHMET</div>
                   <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
                 </div>
                 ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
 
-                <!-- AÇILIR QR SEGME -->
                 <div class="ahmet-dropdown" onclick="event.stopPropagation()">
                   <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img">
                   <div class="ahmet-link-box">
