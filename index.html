@@ -188,9 +188,9 @@
     <main class="main-chat-area" id="panel-chat">
       <div class="chat-header">
         <div class="header-user-info">
-          <div class="chat-item-avatar" id="chat-header-avatar">G</div>
+          <div class="chat-item-avatar" id="chat-header-avatar">E</div>
           <div>
-            <div style="font-weight: 600;" id="chat-header-name">Genel Sohbet Odası</div>
+            <div style="font-weight: 600;" id="chat-header-name">E-Ticaret Sohbeti</div>
             <div style="font-size: 12px;" id="chat-header-status">● Yükleniyor...</div>
           </div>
         </div>
@@ -362,9 +362,8 @@
 
   <script>
     const DEFAULT_USERS = {
-      "ahmet": "1234",
-      "mehmet": "5678",
-      "ayse": "9999",
+      "baris alp": "1234",
+      "batuhan tarran": "5678",
       "admin": "ozelsifre"
     };
 
@@ -609,7 +608,7 @@
 
       let html = '';
       trash.forEach((item, index) => {
-        let roomLabel = item.chatRoom === 'genel' ? 'Genel Sohbet' : `${item.chatRoom.toUpperCase()} ile Özel Sohbet`;
+        let roomLabel = item.chatRoom === 'genel' ? 'E-Ticaret Sohbeti' : `${item.chatRoom.toUpperCase()} ile Özel Sohbet`;
         html += `
           <div style="background: #0b0e14; border: 1px solid #1e2430; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -634,12 +633,10 @@
       const item = trash[index];
       if (!item) return;
 
-      // İlgili sohbete geri ekle
       let messages = JSON.parse(localStorage.getItem(item.storageKey) || '[]');
       messages.push({ user: item.sender, text: item.text, time: item.time });
       localStorage.setItem(item.storageKey, JSON.stringify(messages));
 
-      // Çöpten sil
       trash.splice(index, 1);
       localStorage.setItem('app_trash_bin', JSON.stringify(trash));
 
@@ -653,7 +650,6 @@
       const deletedMsg = messages.splice(index, 1)[0];
       localStorage.setItem(key, JSON.stringify(messages));
 
-      // Çöp kutusuna kaydet
       if (deletedMsg) {
         let trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
         trash.unshift({
@@ -871,8 +867,8 @@
 
       if (activeTarget === 'genel') {
         const onlineCount = getOnlineUserCount();
-        headerAvatar.textContent = 'G';
-        headerName.textContent = 'Genel Sohbet Odası';
+        headerAvatar.textContent = 'E';
+        headerName.textContent = 'E-Ticaret Sohbeti';
         headerStatus.innerHTML = `<span style="color: #22c55e;">● ${onlineCount} Kullanıcı Çevrim İçi</span>`;
 
         profileAvatar.textContent = currentUser.charAt(0).toUpperCase();
@@ -904,11 +900,11 @@
       let html = `
         <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="switchTab('chat'); selectChat('genel');">
           <div class="chat-item-avatar">
-            G
+            E
             <div class="status-dot online"></div>
           </div>
           <div class="chat-item-info">
-            <div class="chat-item-name">GENEL SOHBET</div>
+            <div class="chat-item-name">E-TİCARET SOHBETİ</div>
             <div class="chat-item-lastmsg">${getOnlineUserCount()} kişi aktif</div>
           </div>
           ${genelUnread > 0 ? `<div class="unread-badge">${genelUnread}</div>` : ''}
