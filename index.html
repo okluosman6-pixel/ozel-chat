@@ -47,7 +47,7 @@
     .settings-header { display: flex; align-items: center; justify-content: space-between; font-weight: bold; cursor: pointer; }
     .sound-select-box { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1e2430; }
     
-    /* ÖZEL TOGGLE (AÇMA/KAPAMA ŞALTERİ) STİLİ */
+    /* ÖZEL TOGGLE */
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
@@ -118,7 +118,6 @@
     .chat-list-header { padding: 16px 20px; border-bottom: 1px solid #1e2430; font-size: 16px; font-weight: 600; background: #11151c; }
     .chat-list { overflow-y: auto; flex: 1; }
     
-    /* CHAT ITEM VE BARIŞ ALP ÖZEL HOVER SEGME YAPISI */
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; position: relative; }
     .chat-item:hover, .chat-item.active { background: #1e2430; }
     
@@ -133,8 +132,8 @@
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
     .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
 
-    /* BARIŞ ALP HOVER SEGME (POP-DOWN) STİLİ */
-    .baris-dropdown {
+    /* AHMET İÇİN HOVER SEGME (POP-DOWN) STİLİ */
+    .ahmet-dropdown {
       display: none;
       position: absolute;
       top: 100%;
@@ -149,22 +148,23 @@
       text-align: center;
       animation: fadeInDropdown 0.2s ease-in-out;
     }
-    .chat-item.baris-user-item:hover .baris-dropdown {
+    .chat-item.ahmet-user-item:hover .ahmet-dropdown,
+    .generic-list-item.ahmet-contact-item:hover .ahmet-dropdown {
       display: block;
     }
     @keyframes fadeInDropdown {
       from { opacity: 0; transform: translateY(-5px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .baris-qr-img {
-      width: 110px;
-      height: 110px;
+    .ahmet-qr-img {
+      width: 100px;
+      height: 100px;
       border-radius: 8px;
       object-fit: cover;
       margin-bottom: 8px;
       border: 1px solid #232936;
     }
-    .baris-link-box {
+    .ahmet-link-box {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -174,7 +174,7 @@
       border-radius: 6px;
       gap: 8px;
     }
-    .baris-url-text {
+    .ahmet-url-text {
       font-size: 10px;
       color: #94a3b8;
       white-space: nowrap;
@@ -182,7 +182,7 @@
       text-overflow: ellipsis;
       text-align: left;
     }
-    .baris-copy-btn {
+    .ahmet-copy-btn {
       background: #2563eb;
       color: #fff;
       border: none;
@@ -193,9 +193,9 @@
       flex-shrink: 0;
       transition: 0.2s;
     }
-    .baris-copy-btn:hover { background: #1d4ed8; }
+    .ahmet-copy-btn:hover { background: #1d4ed8; }
 
-    .generic-list-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; }
+    .generic-list-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; position: relative; }
     .generic-list-item i { font-size: 24px; color: #3b82f6; }
 
     #notification-toast { position: absolute; top: 20px; right: 340px; background: #151921; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 1000; cursor: pointer; display: none; }
@@ -211,7 +211,7 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>Özel Sohbet Girişi</h2>
-      <input type="text" id="username-input" placeholder="Kullanıcı Adı" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
+      <input type="text" id="username-input" placeholder="Kullanıcı Adı (örn: ahmet)" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
       <input type="password" id="password-input" placeholder="Şifre" onkeydown="if(event.key==='Enter') login()">
       <button onclick="login()">Giriş Yap</button>
       <p id="error-msg">Hatalı kullanıcı adı veya şifre!</p>
@@ -318,7 +318,7 @@
           </div>
           <button class="btn-danger" onclick="clearTrashBin()" style="font-size: 11px; padding: 4px 8px;">Çöpü Temizle</button>
         </div>
-        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Sohbetlerden sildiğin mesajlar burada hangi odadan silindikleriyle birlikte saklanır.</div>
+        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Sohbetlerden sildiğin mesajlar burada saklanır.</div>
         <div id="trash-bin-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;"></div>
       </div>
 
@@ -337,22 +337,22 @@
           <div class="form-group" style="background: rgba(59, 130, 246, 0.05); padding: 10px; border-radius: 8px; border: 1px solid #1e2430;">
             <label style="color: #3b82f6; font-weight: bold;"><i class="fa-solid fa-cloud-arrow-up"></i> Özel Ses Dosyası Yükle (.mp3 / .wav):</label>
             <input type="file" id="custom-audio-file" accept="audio/*" onchange="handleCustomAudioUpload(event)">
-            <div id="custom-audio-info" style="font-size: 11px; color: #22c55e; margin-top: 6px; display: none;">Özel ses yüklendi! Artık bu ses çalacak.</div>
+            <div id="custom-audio-info" style="font-size: 11px; color: #22c55e; margin-top: 6px; display: none;">Özel ses yüklendi!</div>
           </div>
 
           <div class="form-group" style="margin-top: 12px;">
-            <label>Veya Hazır Tarzlardan Seçin (Seçince test edilir):</label>
+            <label>Veya Hazır Tarzlardan Seçin:</label>
             <select id="sound-choice" onchange="previewSound(this.value)">
-              <option value="1">1. Su Damlası (Ferah & Kısa)</option>
-              <option value="2">2. Lazer Silahı (Dijital & Akıcı)</option>
-              <option value="3">3. Yaylı Tokmak (Derin Bas)</option>
-              <option value="4">4. Kuş Cıvıltısı (Çift Tonlu)</option>
-              <option value="5">5. Marimba Tuşu (Titreşimli Melodi)</option>
+              <option value="1">1. Su Damlası</option>
+              <option value="2">2. Lazer Silahı</option>
+              <option value="3">3. Yaylı Tokmak</option>
+              <option value="4">4. Kuş Cıvıltısı</option>
+              <option value="5">5. Marimba Tuşu</option>
               <option value="6">6. Klasik Telefon Zili</option>
-              <option value="7">7. Akıllı Kapı Zili (Ding-Dong)</option>
-              <option value="8">8. Uzay Gemisi Uyarı Sinyali</option>
-              <option value="9">9. Kalp Atışı (Pulse Vuruş)</option>
-              <option value="10">10. Kristal Çan (Yüksek Frekans)</option>
+              <option value="7">7. Akıllı Kapı Zili</option>
+              <option value="8">8. Uzay Gemisi</option>
+              <option value="9">9. Kalp Atışı</option>
+              <option value="10">10. Kristal Çan</option>
             </select>
           </div>
         </div>
@@ -403,10 +403,6 @@
             <span class="info-label">Kullanıcı Adı: </span>
             <span class="info-value" id="profile-username-val">@kullanici</span>
           </div>
-          <div>
-            <span class="info-label">Durum: </span>
-            <span class="info-value">Özel chat platformu üyesi</span>
-          </div>
         </div>
       </div>
 
@@ -419,8 +415,9 @@
 
   <script>
     const DEFAULT_USERS = {
-      "barış alp": "1234",
-      "batuhan tarran": "5678",
+      "ahmet": "1234",
+      "mehmet": "5678",
+      "ayse": "1111",
       "admin": "ozelsifre"
     };
 
@@ -502,129 +499,26 @@
 
     function playNotificationSound() {
       if (!soundEnabled) return;
-
       if (customAudioDataUrl) {
         try {
           const audio = new Audio(customAudioDataUrl);
-          audio.play().catch(e => console.log("Özel ses çalma engellendi:", e));
-        } catch (err) {
-          console.log("Ses oynatılamadı:", err);
-        }
+          audio.play().catch(e => console.log(e));
+        } catch (err) {}
         return;
       }
 
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const now = audioCtx.currentTime;
-
-        if (selectedSoundType === 1) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.frequency.setValueAtTime(900, now);
-          osc.frequency.exponentialRampToValueAtTime(300, now + 0.12);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.12);
-        } 
-        else if (selectedSoundType === 2) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(1200, now);
-          osc.frequency.linearRampToValueAtTime(200, now + 0.2);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.2);
-        }
-        else if (selectedSoundType === 3) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(180, now);
-          osc.frequency.exponentialRampToValueAtTime(60, now + 0.25);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.25);
-        }
-        else if (selectedSoundType === 4) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.frequency.setValueAtTime(800, now);
-          osc.frequency.setValueAtTime(1200, now + 0.08);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.2);
-        }
-        else if (selectedSoundType === 5) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, now);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.3);
-        }
-        else if (selectedSoundType === 6) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(440, now);
-          osc.frequency.setValueAtTime(480, now + 0.1);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.25);
-        }
-        else if (selectedSoundType === 7) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.frequency.setValueAtTime(659.25, now);
-          osc.frequency.setValueAtTime(523.25, now + 0.15);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.35);
-        }
-        else if (selectedSoundType === 8) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(300, now);
-          osc.frequency.linearRampToValueAtTime(900, now + 0.2);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.2);
-        }
-        else if (selectedSoundType === 9) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(120, now);
-          osc.frequency.setValueAtTime(100, now + 0.1);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.2);
-        }
-        else if (selectedSoundType === 10) {
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(1760, now);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-          osc.connect(gain); gain.connect(audioCtx.destination);
-          osc.start(now); osc.stop(now + 0.3);
-        }
-      } catch (e) {
-        console.log("Ses oynatma hatası:", e);
-      }
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(900, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.12);
+      } catch (e) {}
     }
 
     function prepareSettingsPanel() {
@@ -656,23 +550,20 @@
     function renderTrashBinPanel() {
       const container = document.getElementById('trash-bin-container');
       const trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
-      
       if (trash.length === 0) {
         container.innerHTML = `<div style="font-size: 12px; color: #64748b; text-align: center; padding: 10px;">Çöp kutunuz boş.</div>`;
         return;
       }
-
       let html = '';
       trash.forEach((item, index) => {
-        let roomLabel = item.chatRoom === 'genel' ? 'E-Ticaret Sohbeti' : `${item.chatRoom.toUpperCase()} ile Özel Sohbet`;
+        let roomLabel = item.chatRoom === 'genel' ? 'E-Ticaret Sohbeti' : `${item.chatRoom.toUpperCase()} ile Özel`;
         html += `
           <div style="background: #0b0e14; border: 1px solid #1e2430; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
             <div>
               <div style="font-size: 11px; color: #3b82f6; font-weight: bold; margin-bottom: 2px;">📁 ${roomLabel} (${item.sender.toUpperCase()})</div>
               <div style="font-size: 13px; color: #e1e7ed;">${escapeHtml(item.text)}</div>
-              <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Silinme: ${item.time}</div>
             </div>
-            <button onclick="restoreMessage(${index})" class="btn-primary" style="font-size: 11px; padding: 4px 8px;" title="Geri Yükle"><i class="fa-solid fa-rotate-left"></i></button>
+            <button onclick="restoreMessage(${index})" class="btn-primary" style="font-size: 11px; padding: 4px 8px;"><i class="fa-solid fa-rotate-left"></i></button>
           </div>
         `;
       });
@@ -688,14 +579,11 @@
       let trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
       const item = trash[index];
       if (!item) return;
-
       let messages = JSON.parse(localStorage.getItem(item.storageKey) || '[]');
       messages.push({ user: item.sender, text: item.text, time: item.time });
       localStorage.setItem(item.storageKey, JSON.stringify(messages));
-
       trash.splice(index, 1);
       localStorage.setItem('app_trash_bin', JSON.stringify(trash));
-
       renderTrashBinPanel();
       loadMessages();
     }
@@ -705,7 +593,6 @@
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
       const deletedMsg = messages.splice(index, 1)[0];
       localStorage.setItem(key, JSON.stringify(messages));
-
       if (deletedMsg) {
         let trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
         trash.unshift({
@@ -717,33 +604,23 @@
         });
         localStorage.setItem('app_trash_bin', JSON.stringify(trash));
       }
-
       loadMessages();
     }
 
     function copyMessageText(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Mesaj panoya kopyalandı!");
-      }).catch(err => {
-        console.log("Kopyalama başarısız:", err);
-      });
+      navigator.clipboard.writeText(text).then(() => alert("Mesaj panoya kopyalandı!"));
     }
 
-    function copyBarisInstagramLink(event, url) {
+    function copyAhmetInstagramLink(event, url) {
       event.stopPropagation();
       navigator.clipboard.writeText(url).then(() => {
         alert("Instagram bağlantısı panoya kopyalandı!");
-      }).catch(err => {
-        console.log("Kopyalama başarısız:", err);
       });
     }
 
     function updateDisplayName() {
       const name = document.getElementById('setting-display-name').value.trim();
-      if (name) {
-        alert("Adınız başarıyla güncellendi!");
-        updateHeaderAndProfile();
-      }
+      if (name) alert("Adınız güncellendi!");
     }
 
     function updatePassword() {
@@ -764,8 +641,7 @@
         let users = getUsers();
         users[targetUser] = newPass;
         saveUsers(users);
-        alert(`${targetUser.toUpperCase()} için yeni şifre atandı!`);
-        document.getElementById('admin-new-pass').value = '';
+        alert(`${targetUser.toUpperCase()} şifresi sıfırlandı!`);
       }
     }
 
@@ -774,15 +650,7 @@
       const container = document.getElementById('custom-groups-container');
       let html = '';
       groups.forEach(g => {
-        html += `
-          <div class="generic-list-item">
-            <i class="fa-solid fa-user-group"></i>
-            <div>
-              <div style="font-weight: bold;">${g}</div>
-              <div style="font-size: 12px; color: #94a3b8;">Sohbet Grubu</div>
-            </div>
-          </div>
-        `;
+        html += `<div class="generic-list-item"><i class="fa-solid fa-user-group"></i><div><div style="font-weight: bold;">${g}</div></div></div>`;
       });
       container.innerHTML = html;
     }
@@ -803,18 +671,43 @@
       const container = document.getElementById('contacts-list-container');
       let html = '';
       const users = getUsers();
+      const igUrl = "https://www.instagram.com/alpbaris17?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
+
       Object.keys(users).forEach(user => {
         if (user !== currentUser) {
           let online = isUserOnline(user);
-          html += `
-            <div class="generic-list-item" onclick="switchTab('chat'); selectChat('${user}');" style="cursor:pointer;">
-              <i class="fa-solid fa-circle-user"></i>
-              <div>
-                <div style="font-weight: bold;">${user.toUpperCase()}</div>
-                <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
+          
+          if (user === 'ahmet') {
+            // KİŞİLER PANELİNDE AHMET ÜZERİNE GELİNDİĞİNDE ÇIKACAK ÖZEL YAPI
+            html += `
+              <div class="generic-list-item ahmet-contact-item" style="cursor:pointer;" onclick="switchTab('chat'); selectChat('${user}');">
+                <i class="fa-solid fa-circle-user"></i>
+                <div>
+                  <div style="font-weight: bold;">${user.toUpperCase()}</div>
+                  <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
+                </div>
+
+                <!-- AHMET İÇİN AÇILIR KİŞİ MENÜSÜ -->
+                <div class="ahmet-dropdown" onclick="event.stopPropagation()">
+                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img" id="ahmet-qr-contact">
+                  <div class="ahmet-link-box">
+                    <span class="ahmet-url-text" title="${igUrl}">alpbaris17 Instagram</span>
+                    <button class="ahmet-copy-btn" onclick="copyAhmetInstagramLink(event, '${igUrl}')"><i class="fa-regular fa-copy"></i></button>
+                  </div>
+                </div>
               </div>
-            </div>
-          `;
+            `;
+          } else {
+            html += `
+              <div class="generic-list-item" onclick="switchTab('chat'); selectChat('${user}');" style="cursor:pointer;">
+                <i class="fa-solid fa-circle-user"></i>
+                <div>
+                  <div style="font-weight: bold;">${user.toUpperCase()}</div>
+                  <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
+                </div>
+              </div>
+            `;
+          }
         }
       });
       container.innerHTML = html;
@@ -837,26 +730,18 @@
     function getOnlineUserCount() {
       let count = 0;
       const users = getUsers();
-      Object.keys(users).forEach(user => {
-        if (isUserOnline(user)) count++;
-      });
+      Object.keys(users).forEach(user => { if (isUserOnline(user)) count++; });
       return count;
     }
 
     function showNotification(sender, text) {
       toastSenderTarget = sender;
       document.getElementById('toast-avatar').textContent = sender.charAt(0).toUpperCase();
-      document.getElementById('toast-title').textContent = sender.toUpperCase() + " yeni bir mesaj gönderdi";
+      document.getElementById('toast-title').textContent = sender.toUpperCase() + " yeni mesaj gönderdi";
       document.getElementById('toast-body').textContent = text;
-      
-      const toast = document.getElementById('notification-toast');
-      toast.style.display = 'flex';
-      
+      document.getElementById('notification-toast').style.display = 'flex';
       playNotificationSound();
-
-      setTimeout(() => {
-        toast.style.display = 'none';
-      }, 4000);
+      setTimeout(() => { document.getElementById('notification-toast').style.display = 'none'; }, 4000);
     }
 
     function clickNotification() {
@@ -882,7 +767,6 @@
 
         renderUserList();
         selectChat('genel');
-
         setInterval(checkNewMessages, 1000);
       } else {
         document.getElementById('error-msg').style.display = 'block';
@@ -898,25 +782,15 @@
       location.reload();
     }
 
-    window.addEventListener('beforeunload', () => {
-      if (currentUser) {
-        const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
-        delete onlineData[currentUser];
-        localStorage.setItem('online_users', JSON.stringify(onlineData));
-      }
-    });
-
     function selectChat(targetUser) {
       activeTarget = targetUser;
       unreadCounts[targetUser] = 0;
-
       updateHeaderAndProfile();
       renderUserList();
 
       const key = getStorageKeyFor(targetUser);
       let msgs = JSON.parse(localStorage.getItem(key) || '[]');
       lastSeenMsgCount[key] = msgs.length;
-
       loadMessages();
     }
 
@@ -931,11 +805,9 @@
       const profileStatus = document.getElementById('profile-status-text');
 
       if (activeTarget === 'genel') {
-        const onlineCount = getOnlineUserCount();
         headerAvatar.textContent = 'E';
         headerName.textContent = 'E-Ticaret Sohbeti';
-        headerStatus.innerHTML = `<span style="color: #22c55e;">● ${onlineCount} Kullanıcı Çevrim İçi</span>`;
-
+        headerStatus.innerHTML = `<span style="color: #22c55e;">● ${getOnlineUserCount()} Aktif</span>`;
         profileAvatar.textContent = currentUser.charAt(0).toUpperCase();
         profileName.textContent = currentUser.toUpperCase();
         profileUsername.textContent = '@' + currentUser;
@@ -943,34 +815,27 @@
       } else {
         const online = isUserOnline(activeTarget);
         headerAvatar.textContent = activeTarget.charAt(0).toUpperCase();
-        headerName.textContent = activeTarget.toUpperCase() + ' ile Özel Sohbet';
-        headerStatus.innerHTML = online 
-          ? `<span style="color: #22c55e;">● Çevrim İçi</span>` 
-          : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
-
+        headerName.textContent = activeTarget.toUpperCase() + ' ile Sohbet';
+        headerStatus.innerHTML = online ? `<span style="color: #22c55e;">● Çevrim İçi</span>` : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
         profileAvatar.textContent = activeTarget.charAt(0).toUpperCase();
         profileName.textContent = activeTarget.toUpperCase();
         profileUsername.textContent = '@' + activeTarget;
-        profileStatus.innerHTML = online 
-          ? `<span style="color: #22c55e;">● Çevrim İçi</span>` 
-          : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
+        profileStatus.innerHTML = online ? `<span style="color: #22c55e;">● Çevrim İçi</span>` : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
       }
     }
 
     function renderUserList() {
       const container = document.getElementById('users-list');
       const users = getUsers();
+      const igUrl = "https://www.instagram.com/alpbaris17?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
       
       let genelUnread = unreadCounts['genel'] || 0;
       let html = `
         <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="switchTab('chat'); selectChat('genel');">
-          <div class="chat-item-avatar">
-            E
-            <div class="status-dot online"></div>
-          </div>
+          <div class="chat-item-avatar">E<div class="status-dot online"></div></div>
           <div class="chat-item-info">
             <div class="chat-item-name">E-TİCARET SOHBETİ</div>
-            <div class="chat-item-lastmsg">${getOnlineUserCount()} kişi aktif</div>
+            <div class="chat-item-lastmsg">Genel Kanal</div>
           </div>
           ${genelUnread > 0 ? `<div class="unread-badge">${genelUnread}</div>` : ''}
         </div>
@@ -981,11 +846,10 @@
           let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
           
-          if (user === 'barış alp') {
-            const igUrl = "https://www.instagram.com/alpbaris17?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
-            // Barış Alp satırına özel hover segme (dropdown) eklendi
+          if (user === 'ahmet') {
+            // AHMET İÇİN SAĞ LİSTEDE HOVER AÇILIR MENÜ
             html += `
-              <div class="chat-item baris-user-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
+              <div class="chat-item ahmet-user-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
                 <div class="chat-item-avatar">
                   ${user.charAt(0).toUpperCase()}
                   <div class="status-dot ${online ? 'online' : 'offline'}"></div>
@@ -996,12 +860,12 @@
                 </div>
                 ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
 
-                <!-- AÇILIR SEGME (POP-DOWN) -->
-                <div class="baris-dropdown" onclick="event.stopPropagation()">
-                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Baris Alp QR" class="baris-qr-img" id="baris-qr-element">
-                  <div class="baris-link-box">
-                    <span class="baris-url-text" title="${igUrl}">alpbaris17 Instagram</span>
-                    <button class="baris-copy-btn" onclick="copyBarisInstagramLink(event, '${igUrl}')" title="Bağlantıyı Kopyala"><i class="fa-regular fa-copy"></i></button>
+                <!-- AÇILIR QR SEGME -->
+                <div class="ahmet-dropdown" onclick="event.stopPropagation()">
+                  <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" alt="Ahmet QR" class="ahmet-qr-img">
+                  <div class="ahmet-link-box">
+                    <span class="ahmet-url-text" title="${igUrl}">alpbaris17 Instagram</span>
+                    <button class="ahmet-copy-btn" onclick="copyAhmetInstagramLink(event, '${igUrl}')"><i class="fa-regular fa-copy"></i></button>
                   </div>
                 </div>
               </div>
@@ -1023,15 +887,7 @@
           }
         }
       });
-
       container.innerHTML = html;
-      
-      // Sağladığın görselin data-url bağlamı
-      const qrEl = document.getElementById('baris-qr-element');
-      if (qrEl) {
-        // Görsel verisini doğrudan kaynak olarak atıyoruz
-        qrEl.src = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAAZABkBCAAB/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; 
-      }
     }
 
     function getStorageKeyFor(target) {
@@ -1047,14 +903,12 @@
 
       const now = new Date();
       const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-
       const msgData = { user: currentUser, text: text, time: timeStr };
       const key = getStorageKeyFor(activeTarget);
 
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
       messages.push(msgData);
       localStorage.setItem(key, JSON.stringify(messages));
-
       lastSeenMsgCount[key] = messages.length;
 
       input.value = '';
@@ -1090,7 +944,6 @@
       const list = document.getElementById('message-list');
       const key = getStorageKeyFor(activeTarget);
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
-      
       lastSeenMsgCount[key] = messages.length;
 
       let html = '';
@@ -1101,8 +954,8 @@
             <div class="message-content-wrapper">
               <div class="bubble">${escapeHtml(msg.text)}</div>
               <div class="msg-actions">
-                <button class="msg-action-btn" onclick="copyMessageText('${escapeHtml(msg.text).replace(/'/g, "\\'")}')" title="Kopyala"><i class="fa-regular fa-copy"></i></button>
-                <button class="msg-action-btn delete" onclick="deleteMessage(${index})" title="Sil (Çöp Kutusuna Gönder)"><i class="fa-regular fa-trash-can"></i></button>
+                <button class="msg-action-btn" onclick="copyMessageText('${escapeHtml(msg.text).replace(/'/g, "\\'")}')"><i class="fa-regular fa-copy"></i></button>
+                <button class="msg-action-btn delete" onclick="deleteMessage(${index})"><i class="fa-regular fa-trash-can"></i></button>
               </div>
             </div>
             <div class="time-stamp">${msg.user.toUpperCase()} • ${msg.time}</div>
