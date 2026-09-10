@@ -111,7 +111,7 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>Özel Sohbet Girişi</h2>
-      <input type="text" id="username-input" placeholder="Kullanıcı Adı" onkeydown="if(event.key==='Enter') login()">
+      <input type="text" id="username-input" placeholder="Kullanıcı Adı" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
       <input type="password" id="password-input" placeholder="Şifre" onkeydown="if(event.key==='Enter') login()">
       <button onclick="login()">Giriş Yap</button>
       <p id="error-msg">Hatalı kullanıcı adı veya şifre!</p>
