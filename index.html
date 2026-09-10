@@ -29,35 +29,29 @@
     .nav-item i { font-size: 18px; }
     .nav-item.active, .nav-item:hover { color: #3b82f6; border-left: 3px solid #3b82f6; }
 
-    /* YENİ ÇIKIŞ BUTONU */
+    /* ÇIKIŞ BUTONU */
     .exit-btn {
-      width: 75px;
-      padding: 8px 4px;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid #ef4444;
-      border-radius: 8px;
-      color: #ef4444;
-      font-size: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      text-align: center;
-      transition: all 0.2s ease;
-      margin-bottom: 10px;
+      width: 75px; padding: 8px 4px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444; font-size: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; transition: all 0.2s ease; margin-bottom: 10px;
     }
-    .exit-btn:hover {
-      background: #ef4444;
-      color: #fff;
-    }
+    .exit-btn:hover { background: #ef4444; color: #fff; }
     .exit-btn i { font-size: 14px; }
 
-    /* PANELER SAKLAMA / GÖSTERME */
-    .content-panel { flex: 1; display: none; background: #0b0e14; padding: 40px; overflow-y: auto; }
+    /* PANEL YÖNETİMİ */
+    .content-panel { flex: 1; display: none; background: #0b0e14; padding: 30px; overflow-y: auto; }
     .content-panel.active { display: flex; flex-direction: column; }
     .panel-title { font-size: 22px; font-weight: bold; color: #3b82f6; margin-bottom: 20px; }
+
+    /* FORM ÖĞELERİ VE KARTLAR */
+    .settings-card { background: #151921; border: 1px solid #1e2430; border-radius: 12px; padding: 16px; margin-bottom: 16px; cursor: pointer; transition: 0.2s; }
+    .settings-card:hover { border-color: #3b82f6; }
+    .settings-header { display: flex; align-items: center; justify-content: space-between; font-weight: bold; }
+    .sound-select-box { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1e2430; }
+    
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #232936; border-radius: 6px; color: #fff; outline: none; font-size: 13px; }
+    .btn-primary { padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .btn-primary:hover { background: #1d4ed8; }
 
     /* 2. ANA SOHBET ALANI */
     .main-chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0e14; }
@@ -85,7 +79,6 @@
 
     /* 3. SAĞ PANEL */
     .right-sidebar { width: 320px; background: #151921; border-left: 1px solid #1e2430; display: flex; flex-direction: column; }
-    
     .profile-card-large { text-align: center; border-bottom: 1px solid #1e2430; padding: 20px; }
     .profile-avatar-large { width: 70px; height: 70px; border-radius: 50%; background: #2563eb; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
     .profile-info-section { display: flex; flex-direction: column; gap: 8px; font-size: 12px; margin-top: 12px; text-align: left; }
@@ -99,7 +92,6 @@
     .chat-item:hover, .chat-item.active { background: #1e2430; }
     .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; }
     
-    /* DURUM NOKTALARI */
     .status-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
     .status-dot.online { background: #22c55e; }
     .status-dot.offline { background: #64748b; }
@@ -107,36 +99,12 @@
     .chat-item-info { flex: 1; overflow: hidden; }
     .chat-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
     .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
-    
-    /* OKUNMAMIŞ MESAJ ROZETİ */
     .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
 
-    /* LİSTE ELEMANLARI (KİŞİLER/GRUPLAR İÇİN) */
     .generic-list-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; }
     .generic-list-item i { font-size: 24px; color: #3b82f6; }
 
-    /* SAĞ ÜST BİLDİRİM (TOAST) */
-    #notification-toast {
-      position: absolute;
-      top: 20px;
-      right: 340px;
-      background: #151921;
-      border: 1px solid #3b82f6;
-      border-radius: 12px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-      z-index: 1000;
-      cursor: pointer;
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    #notification-toast { position: absolute; top: 20px; right: 340px; background: #151921; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 1000; cursor: pointer; display: none; }
     .toast-avatar { width: 36px; height: 36px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: bold; }
     .toast-content { display: flex; flex-direction: column; }
     .toast-title { font-size: 13px; font-weight: bold; color: #fff; }
@@ -159,7 +127,7 @@
   <!-- UYGULAMA ANA ALANI -->
   <div id="app-container">
     
-    <!-- ÜST POP-UP BİLDİRİM KARTI -->
+    <!-- TOAST BİLDİRİMİ -->
     <div id="notification-toast" onclick="clickNotification()">
       <div class="toast-avatar" id="toast-avatar">A</div>
       <div class="toast-content">
@@ -180,7 +148,6 @@
         </div>
       </div>
       
-      <!-- SIKILDIYSAN KAPI ORADA ÇIKIŞ BUTONU -->
       <button class="exit-btn" onclick="logout()" title="Çıkış Yap">
         <i class="fa-solid fa-door-open"></i>
         <span>Sıkıldıysan kapı orada</span>
@@ -226,39 +193,89 @@
     <!-- GRUPLAR PANELİ -->
     <section class="content-panel" id="panel-groups">
       <div class="panel-title">Gruplar</div>
+      
       <div class="generic-list-item">
-        <i class="fa-solid fa-user-group"></i>
+        <i class="fa-solid fa-shield-halved"></i>
         <div>
-          <div style="font-weight: bold;">Genel Sohbet Odası</div>
-          <div style="font-size: 12px; color: #94a3b8;">Tüm platform üyelerinin açık kanalı</div>
+          <div style="font-weight: bold;">Yöneticiler</div>
+          <div style="font-size: 12px; color: #94a3b8;">Sadece yöneticiler kurabilir</div>
         </div>
       </div>
-      <div class="generic-list-item">
-        <i class="fa-solid fa-lock"></i>
-        <div>
-          <div style="font-weight: bold;">Yöneticiler Özel Ekibi</div>
-          <div style="font-size: 12px; color: #94a3b8;">Yalnızca Yetkili Erişimi</div>
+
+      <div id="custom-groups-container"></div>
+
+      <div class="settings-card" style="cursor:default; margin-top: 15px;">
+        <div style="font-weight:bold; margin-bottom: 10px;">Yeni Grup Ekle</div>
+        <div class="form-group">
+          <input type="text" id="new-group-name" placeholder="Grup Adı Yazın...">
         </div>
+        <button class="btn-primary" onclick="addNewGroup()">Grubu Oluştur</button>
       </div>
     </section>
 
     <!-- AYARLAR PANELİ -->
     <section class="content-panel" id="panel-settings">
-      <div class="panel-title">Uygulama Ayarları</div>
-      <div class="generic-list-item">
-        <i class="fa-solid fa-bell"></i>
-        <div>
-          <div style="font-weight: bold;">Bildirim Sesleri</div>
-          <div style="font-size: 12px; color: #94a3b8;">Yeni mesaj geldiğinde ses efekti çalınsın.</div>
+      <div class="panel-title">Ayarlar</div>
+
+      <!-- BİLDİRİM SESLERİ (SADECE BAŞLIK & 10 SES SEÇENEĞİ) -->
+      <div class="settings-card" onclick="toggleSoundSelect()">
+        <div class="settings-header">
+          <span><i class="fa-solid fa-bell" style="margin-right:8px; color:#3b82f6;"></i> Bildirim Sesleri</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="sound-select-box" id="sound-select-box" onclick="event.stopPropagation();">
+          <div class="form-group">
+            <label>Bildirim Tonu Seçin:</label>
+            <select id="sound-choice" onchange="previewSound(this.value)">
+              <option value="1">1. Klasik Bip (Varsayılan)</option>
+              <option value="2">2. Çift Tık Ses</option>
+              <option value="3">3. Yüksek Melodi</option>
+              <option value="4">4. Basit Tık</option>
+              <option value="5">5. Dijital Alarm</option>
+              <option value="6">6. Pop Sesi</option>
+              <option value="7">7. Düşük Frekans</option>
+              <option value="8">8. Uyumlu Zil</option>
+              <option value="9">9. Tri-Tone</option>
+              <option value="10">10. Tekil Pulse</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div class="generic-list-item">
-        <i class="fa-solid fa-shield-halved"></i>
-        <div>
-          <div style="font-weight: bold;">Gizlilik ve Çevrim İçi Durumu</div>
-          <div style="font-size: 12px; color: #94a3b8;">Diğer kullanıcılar aktifliğinizi 10sn içinde görür.</div>
+
+      <!-- AD / PROFİL DEĞİŞTİRME -->
+      <div class="settings-card" style="cursor:default;">
+        <div style="font-weight:bold; margin-bottom:12px;"><i class="fa-solid fa-id-card" style="margin-right:8px; color:#3b82f6;"></i> Adını Değiştir</div>
+        <div class="form-group">
+          <label>Görünen Adın:</label>
+          <input type="text" id="setting-display-name">
         </div>
+        <button class="btn-primary" onclick="updateDisplayName()">Adı Güncelle</button>
       </div>
+
+      <!-- ŞİFRE DEĞİŞTİRME -->
+      <div class="settings-card" style="cursor:default;">
+        <div style="font-weight:bold; margin-bottom:12px;"><i class="fa-solid fa-key" style="margin-right:8px; color:#3b82f6;"></i> Şifreni Değiştir</div>
+        <div class="form-group">
+          <label>Yeni Şifre:</label>
+          <input type="password" id="setting-new-pass" placeholder="Yeni şifreniz">
+        </div>
+        <button class="btn-primary" onclick="updatePassword()">Şifreyi Güncelle</button>
+      </div>
+
+      <!-- ADMIN ÖZEL PANELİ (ŞİFRE SIFIRLAMA) -->
+      <div class="settings-card" id="admin-panel-card" style="display:none; cursor:default; border-color:#2563eb;">
+        <div style="font-weight:bold; color:#3b82f6; margin-bottom:12px;"><i class="fa-solid fa-user-shield" style="margin-right:8px;"></i> Admin Şifre Sıfırlama Paneli</div>
+        <div class="form-group">
+          <label>Kullanıcı Seçin:</label>
+          <select id="admin-user-select"></select>
+        </div>
+        <div class="form-group">
+          <label>Atanacak Yeni Şifre:</label>
+          <input type="text" id="admin-new-pass" placeholder="Yeni şifre belirleyin">
+        </div>
+        <button class="btn-primary" onclick="adminResetPassword()">Kullanıcı Şifresini Sıfırla</button>
+      </div>
+
     </section>
 
     <!-- 3. SAĞ PANEL -->
@@ -288,18 +305,32 @@
   </div>
 
   <script>
-    const ALLOWED_USERS = {
+    // VARSAYILAN KULLANICILAR VE DİNAMİK VERİ TABANI
+    const DEFAULT_USERS = {
       "ahmet": "1234",
       "mehmet": "5678",
       "ayse": "9999",
       "admin": "ozelsifre"
     };
 
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('app_users')) || DEFAULT_USERS;
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem('app_users', JSON.stringify(users));
+    }
+
+    if (!localStorage.getItem('app_users')) {
+      saveUsers(DEFAULT_USERS);
+    }
+
     let currentUser = "";
     let activeTarget = "genel";
     let unreadCounts = {};
     let lastSeenMsgCount = {};
     let toastSenderTarget = "";
+    let selectedSoundFreq = 1;
 
     function switchTab(tabName) {
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -316,15 +347,130 @@
         document.getElementById('panel-' + tabName).classList.add('active');
       }
 
-      if (tabName === 'contacts') {
-        renderContactsPanel();
+      if (tabName === 'contacts') renderContactsPanel();
+      if (tabName === 'groups') renderCustomGroups();
+      if (tabName === 'settings') prepareSettingsPanel();
+    }
+
+    function toggleSoundSelect() {
+      const box = document.getElementById('sound-select-box');
+      box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function previewSound(val) {
+      selectedSoundFreq = parseInt(val);
+      playNotificationSound();
+    }
+
+    function playNotificationSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        let baseFreq = 300 + (selectedSoundFreq * 80);
+        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, audioCtx.currentTime + 0.15);
+
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {
+        console.log("Ses çalınamadı:", e);
+      }
+    }
+
+    function prepareSettingsPanel() {
+      document.getElementById('setting-display-name').value = currentUser.toUpperCase();
+      
+      const adminCard = document.getElementById('admin-panel-card');
+      if (currentUser === 'admin') {
+        adminCard.style.display = 'block';
+        const users = getUsers();
+        const select = document.getElementById('admin-user-select');
+        select.innerHTML = '';
+        Object.keys(users).forEach(u => {
+          if (u !== 'admin') {
+            select.innerHTML += `<option value="${u}">${u.toUpperCase()}</option>`;
+          }
+        });
+      } else {
+        adminCard.style.display = 'none';
+      }
+    }
+
+    function updateDisplayName() {
+      const name = document.getElementById('setting-display-name').value.trim();
+      if (name) {
+        alert("Adınız başarıyla güncellendi!");
+        updateHeaderAndProfile();
+      }
+    }
+
+    function updatePassword() {
+      const newPass = document.getElementById('setting-new-pass').value.trim();
+      if (newPass) {
+        let users = getUsers();
+        users[currentUser] = newPass;
+        saveUsers(users);
+        alert("Şifreniz güncellendi!");
+        document.getElementById('setting-new-pass').value = '';
+      }
+    }
+
+    function adminResetPassword() {
+      const targetUser = document.getElementById('admin-user-select').value;
+      const newPass = document.getElementById('admin-new-pass').value.trim();
+      if (targetUser && newPass) {
+        let users = getUsers();
+        users[targetUser] = newPass;
+        saveUsers(users);
+        alert(`${targetUser.toUpperCase()} için yeni şifre atandı!`);
+        document.getElementById('admin-new-pass').value = '';
+      }
+    }
+
+    function renderCustomGroups() {
+      const groups = JSON.parse(localStorage.getItem('app_custom_groups') || '[]');
+      const container = document.getElementById('custom-groups-container');
+      let html = '';
+      groups.forEach(g => {
+        html += `
+          <div class="generic-list-item">
+            <i class="fa-solid fa-user-group"></i>
+            <div>
+              <div style="font-weight: bold;">${g}</div>
+              <div style="font-size: 12px; color: #94a3b8;">Sohbet Grubu</div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function addNewGroup() {
+      const input = document.getElementById('new-group-name');
+      const val = input.value.trim();
+      if (val) {
+        let groups = JSON.parse(localStorage.getItem('app_custom_groups') || '[]');
+        groups.push(val);
+        localStorage.setItem('app_custom_groups', JSON.stringify(groups));
+        input.value = '';
+        renderCustomGroups();
       }
     }
 
     function renderContactsPanel() {
       const container = document.getElementById('contacts-list-container');
       let html = '';
-      Object.keys(ALLOWED_USERS).forEach(user => {
+      const users = getUsers();
+      Object.keys(users).forEach(user => {
         if (user !== currentUser) {
           let online = isUserOnline(user);
           html += `
@@ -357,33 +503,11 @@
 
     function getOnlineUserCount() {
       let count = 0;
-      Object.keys(ALLOWED_USERS).forEach(user => {
+      const users = getUsers();
+      Object.keys(users).forEach(user => {
         if (isUserOnline(user)) count++;
       });
       return count;
-    }
-
-    function playNotificationSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.25);
-      } catch (e) {
-        console.log("Ses çalınamadı:", e);
-      }
     }
 
     function showNotification(sender, text) {
@@ -413,8 +537,9 @@
     function login() {
       const u = document.getElementById('username-input').value.toLowerCase().trim();
       const p = document.getElementById('password-input').value;
+      const users = getUsers();
 
-      if (ALLOWED_USERS[u] && ALLOWED_USERS[u] === p) {
+      if (users[u] && users[u] === p) {
         currentUser = u;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-container').style.display = 'flex';
@@ -501,6 +626,7 @@
 
     function renderUserList() {
       const container = document.getElementById('users-list');
+      const users = getUsers();
       
       let genelUnread = unreadCounts['genel'] || 0;
       let html = `
@@ -517,7 +643,7 @@
         </div>
       `;
 
-      Object.keys(ALLOWED_USERS).forEach(user => {
+      Object.keys(users).forEach(user => {
         if (user !== currentUser) {
           let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
@@ -572,7 +698,8 @@
       renderUserList();
       loadMessages();
 
-      const targets = ['genel', ...Object.keys(ALLOWED_USERS).filter(u => u !== currentUser)];
+      const users = getUsers();
+      const targets = ['genel', ...Object.keys(users).filter(u => u !== currentUser)];
 
       targets.forEach(target => {
         const key = getStorageKeyFor(target);
