@@ -22,13 +22,42 @@
     #app-container { display: none; height: 100vh; width: 100vw; position: relative; }
     
     /* 1. SOL DAR MENÜ */
-    .nav-sidebar { width: 70px; background: #10141d; border-right: 1px solid #1e2430; display: flex; flex-direction: column; align-items: center; padding: 20px 0; justify-content: space-between; }
+    .nav-sidebar { width: 85px; background: #10141d; border-right: 1px solid #1e2430; display: flex; flex-direction: column; align-items: center; padding: 20px 0; justify-content: space-between; }
     .logo-icon { width: 40px; height: 40px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #fff; margin-bottom: 30px; }
-    .nav-menu { display: flex; flex-direction: column; gap: 20px; width: 100%; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 11px; cursor: pointer; padding: 10px 0; width: 100%; }
+    .nav-menu { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 11px; cursor: pointer; padding: 10px 0; width: 100%; transition: 0.2s; }
     .nav-item i { font-size: 18px; }
     .nav-item.active, .nav-item:hover { color: #3b82f6; border-left: 3px solid #3b82f6; }
-    .user-avatar-small { width: 38px; height: 38px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; cursor: pointer; }
+
+    /* YENİ ÇIKIŞ BUTONU */
+    .exit-btn {
+      width: 75px;
+      padding: 8px 4px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      color: #ef4444;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+      transition: all 0.2s ease;
+      margin-bottom: 10px;
+    }
+    .exit-btn:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+    .exit-btn i { font-size: 14px; }
+
+    /* PANELER SAKLAMA / GÖSTERME */
+    .content-panel { flex: 1; display: none; background: #0b0e14; padding: 40px; overflow-y: auto; }
+    .content-panel.active { display: flex; flex-direction: column; }
+    .panel-title { font-size: 22px; font-weight: bold; color: #3b82f6; margin-bottom: 20px; }
 
     /* 2. ANA SOHBET ALANI */
     .main-chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0e14; }
@@ -81,6 +110,10 @@
     
     /* OKUNMAMIŞ MESAJ ROZETİ */
     .unread-badge { background: #2563eb; color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 7px; margin-left: auto; }
+
+    /* LİSTE ELEMANLARI (KİŞİLER/GRUPLAR İÇİN) */
+    .generic-list-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; }
+    .generic-list-item i { font-size: 24px; color: #3b82f6; }
 
     /* SAĞ ÜST BİLDİRİM (TOAST) */
     #notification-toast {
@@ -140,17 +173,22 @@
       <div>
         <div class="logo-icon">M</div>
         <div class="nav-menu">
-          <a class="nav-item active"><i class="fa-solid fa-comment"></i>Sohbet</a>
-          <a class="nav-item"><i class="fa-solid fa-user"></i>Kişiler</a>
-          <a class="nav-item"><i class="fa-solid fa-user-group"></i>Gruplar</a>
-          <a class="nav-item"><i class="fa-solid fa-gear"></i>Ayarlar</a>
+          <a class="nav-item active" id="nav-chat" onclick="switchTab('chat')"><i class="fa-solid fa-comment"></i>Sohbet</a>
+          <a class="nav-item" id="nav-contacts" onclick="switchTab('contacts')"><i class="fa-solid fa-user"></i>Kişiler</a>
+          <a class="nav-item" id="nav-groups" onclick="switchTab('groups')"><i class="fa-solid fa-user-group"></i>Gruplar</a>
+          <a class="nav-item" id="nav-settings" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i>Ayarlar</a>
         </div>
       </div>
-      <div class="user-avatar-small" id="nav-user-avatar" onclick="logout()" title="Çıkış Yap">?</div>
+      
+      <!-- SIKILDIYSAN KAPI ORADA ÇIKIŞ BUTONU -->
+      <button class="exit-btn" onclick="logout()" title="Çıkış Yap">
+        <i class="fa-solid fa-door-open"></i>
+        <span>Sıkıldıysan kapı orada</span>
+      </button>
     </nav>
 
-    <!-- 2. ORTA SOHBET ALANI -->
-    <main class="main-chat-area">
+    <!-- 2. SOHBET ALANI -->
+    <main class="main-chat-area" id="panel-chat">
       <div class="chat-header">
         <div class="header-user-info">
           <div class="chat-item-avatar" id="chat-header-avatar">G</div>
@@ -178,6 +216,50 @@
         <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
     </main>
+
+    <!-- KİŞİLER PANELİ -->
+    <section class="content-panel" id="panel-contacts">
+      <div class="panel-title">Kayıtlı Kişiler</div>
+      <div id="contacts-list-container"></div>
+    </section>
+
+    <!-- GRUPLAR PANELİ -->
+    <section class="content-panel" id="panel-groups">
+      <div class="panel-title">Gruplar</div>
+      <div class="generic-list-item">
+        <i class="fa-solid fa-user-group"></i>
+        <div>
+          <div style="font-weight: bold;">Genel Sohbet Odası</div>
+          <div style="font-size: 12px; color: #94a3b8;">Tüm platform üyelerinin açık kanalı</div>
+        </div>
+      </div>
+      <div class="generic-list-item">
+        <i class="fa-solid fa-lock"></i>
+        <div>
+          <div style="font-weight: bold;">Yöneticiler Özel Ekibi</div>
+          <div style="font-size: 12px; color: #94a3b8;">Yalnızca Yetkili Erişimi</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AYARLAR PANELİ -->
+    <section class="content-panel" id="panel-settings">
+      <div class="panel-title">Uygulama Ayarları</div>
+      <div class="generic-list-item">
+        <i class="fa-solid fa-bell"></i>
+        <div>
+          <div style="font-weight: bold;">Bildirim Sesleri</div>
+          <div style="font-size: 12px; color: #94a3b8;">Yeni mesaj geldiğinde ses efekti çalınsın.</div>
+        </div>
+      </div>
+      <div class="generic-list-item">
+        <i class="fa-solid fa-shield-halved"></i>
+        <div>
+          <div style="font-weight: bold;">Gizlilik ve Çevrim İçi Durumu</div>
+          <div style="font-size: 12px; color: #94a3b8;">Diğer kullanıcılar aktifliğinizi 10sn içinde görür.</div>
+        </div>
+      </div>
+    </section>
 
     <!-- 3. SAĞ PANEL -->
     <aside class="right-sidebar">
@@ -219,7 +301,46 @@
     let lastSeenMsgCount = {};
     let toastSenderTarget = "";
 
-    // KALBİN ATMA HIZI (ÇEVRİM İÇİ SİNYALİ)
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('nav-' + tabName).classList.add('active');
+
+      document.getElementById('panel-chat').style.display = 'none';
+      document.getElementById('panel-contacts').classList.remove('active');
+      document.getElementById('panel-groups').classList.remove('active');
+      document.getElementById('panel-settings').classList.remove('active');
+
+      if (tabName === 'chat') {
+        document.getElementById('panel-chat').style.display = 'flex';
+      } else {
+        document.getElementById('panel-' + tabName).classList.add('active');
+      }
+
+      if (tabName === 'contacts') {
+        renderContactsPanel();
+      }
+    }
+
+    function renderContactsPanel() {
+      const container = document.getElementById('contacts-list-container');
+      let html = '';
+      Object.keys(ALLOWED_USERS).forEach(user => {
+        if (user !== currentUser) {
+          let online = isUserOnline(user);
+          html += `
+            <div class="generic-list-item" onclick="switchTab('chat'); selectChat('${user}');" style="cursor:pointer;">
+              <i class="fa-solid fa-circle-user"></i>
+              <div>
+                <div style="font-weight: bold;">${user.toUpperCase()}</div>
+                <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
+              </div>
+            </div>
+          `;
+        }
+      });
+      container.innerHTML = html;
+    }
+
     function updateHeartbeat() {
       if (!currentUser) return;
       const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
@@ -231,7 +352,6 @@
       const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
       const lastSeen = onlineData[username];
       if (!lastSeen) return false;
-      // Son 10 saniye içinde sinyal vermişse çevrim içi say
       return (Date.now() - lastSeen) < 10000;
     }
 
@@ -284,6 +404,7 @@
 
     function clickNotification() {
       if (toastSenderTarget) {
+        switchTab('chat');
         selectChat(toastSenderTarget);
         document.getElementById('notification-toast').style.display = 'none';
       }
@@ -297,8 +418,6 @@
         currentUser = u;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-container').style.display = 'flex';
-        
-        document.getElementById('nav-user-avatar').textContent = u.charAt(0).toUpperCase();
 
         updateHeartbeat();
         setInterval(updateHeartbeat, 3000);
@@ -385,7 +504,7 @@
       
       let genelUnread = unreadCounts['genel'] || 0;
       let html = `
-        <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
+        <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="switchTab('chat'); selectChat('genel');">
           <div class="chat-item-avatar">
             G
             <div class="status-dot online"></div>
@@ -403,7 +522,7 @@
           let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
           html += `
-            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="selectChat('${user}')">
+            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
               <div class="chat-item-avatar">
                 ${user.charAt(0).toUpperCase()}
                 <div class="status-dot ${online ? 'online' : 'offline'}"></div>
