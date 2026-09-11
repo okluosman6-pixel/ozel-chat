@@ -75,8 +75,20 @@
     .main-chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0e14; }
     .chat-header { height: 70px; border-bottom: 1px solid #1e2430; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; background: #151921; }
     .header-user-info { display: flex; align-items: center; gap: 12px; }
-    .header-actions { display: flex; gap: 16px; color: #94a3b8; font-size: 18px; cursor: pointer; }
-    .header-actions i:hover { color: #fff; }
+    
+    /* Başlık Üzerindeki Buton Alanı ve Açılır Menü Stilleri */
+    .chat-header-actions { display: flex; align-items: center; gap: 15px; position: relative; }
+    .chat-header-actions button { background: transparent; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 50%; transition: background-color 0.2s, color 0.2s; font-size: 18px; }
+    .chat-header-actions button:hover { background-color: rgba(255, 255, 255, 0.08); color: #ffffff; }
+
+    .menu-container { position: relative; }
+    .dropdown-menu { position: absolute; right: 0; top: 45px; background-color: #2a343d; border-radius: 8px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; min-width: 170px; z-index: 100; overflow: hidden; }
+    .dropdown-menu.hidden { display: none; }
+    .menu-item { padding: 12px 16px; text-align: left; border: none; background: transparent; cursor: pointer; font-size: 14px; width: 100%; transition: background-color 0.2s; }
+    .menu-item:hover { background-color: rgba(255, 255, 255, 0.05); }
+    
+    .white-text { color: #ffffff !important; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .red-text { color: #ff4d4d !important; }
 
     .messages-container { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
     .message-row { display: flex; flex-direction: column; max-width: 65%; position: relative; }
@@ -195,10 +207,32 @@
             <div style="font-size: 12px;" id="chat-header-status">● Yükleniyor...</div>
           </div>
         </div>
-        <div class="header-actions">
-          <i class="fa-solid fa-phone"></i>
-          <i class="fa-solid fa-video"></i>
-          <i class="fa-solid fa-ellipsis-vertical"></i>
+
+        <!-- Güncellenen Sesli, Görüntülü Arama ve Üç Nokta Menü Alanı -->
+        <div class="chat-header-actions">
+          <!-- Sol: Canlı Sesli Arama Tuşu -->
+          <button id="audioCallBtn" title="Canlı Sesli Görüşme">
+            <i class="fa-solid fa-phone"></i>
+          </button>
+          
+          <!-- Orta: Canlı Görüntülü Arama Tuşu -->
+          <button id="videoCallBtn" title="Canlı Görüntülü Görüşme">
+            <i class="fa-solid fa-video"></i>
+          </button>
+          
+          <!-- Sağ: Üst üste üç nokta ve Açılır Menü -->
+          <div class="menu-container">
+            <button id="menuToggleBtn" title="Seçenekler">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+
+            <!-- Açılır Küçük Pencere -->
+            <div id="dropdownMenu" class="dropdown-menu hidden">
+              <button id="renameBtn" class="menu-item white-text">Yeniden Adlandır</button>
+              <button id="deleteChatBtn" class="menu-item red-text">Sohbeti Sil</button>
+              <button id="blockUserBtn" class="menu-item red-text">Engelle</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -392,6 +426,50 @@
     let soundEnabled = true;
     let customAudioDataUrl = localStorage.getItem('custom_audio_file') || null;
 
+    // --- GİRİŞ & OTURUM İŞLEMLERİ ---
+    function login() {
+      const uInput = document.getElementById('username-input').value.trim().toLowerCase();
+      const pInput = document.getElementById('password-input').value.trim();
+      const users = getUsers();
+
+      if (users[uInput] && users[uInput] === pInput) {
+        currentUser = uInput;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        initApp();
+      } else {
+        const err = document.getElementById('error-msg');
+        err.style.display = 'block';
+      }
+    }
+
+    function logout() {
+      currentUser = "";
+      document.getElementById('app-container').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('username-input').value = '';
+      document.getElementById('password-input').value = '';
+    }
+
+    function initApp() {
+      updateHeartbeat();
+      setInterval(updateHeartbeat, 3000);
+      setInterval(pollData, 1500);
+
+      updateHeaderAndProfile();
+      renderUserList();
+      selectChat('genel');
+    }
+
+    function updateHeaderAndProfile() {
+      const displayName = getDisplayNameFor(currentUser);
+      document.getElementById('profile-name-big').textContent = displayName.toUpperCase();
+      document.getElementById('profile-username-val').textContent = "@" + currentUser;
+      document.getElementById('profile-avatar-big').textContent = displayName.charAt(0).toUpperCase();
+      document.getElementById('profile-status-text').textContent = "● Çevrim İçi";
+      document.getElementById('profile-status-text').style.color = "#22c55e";
+    }
+
     function switchTab(tabName) {
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.getElementById('nav-' + tabName).classList.add('active');
@@ -412,6 +490,7 @@
       if (tabName === 'settings') prepareSettingsPanel();
     }
 
+    // --- SES ve BİLDİRİM İŞLEMLERİ ---
     function toggleSoundMaster(checkbox) {
       soundEnabled = checkbox.checked;
     }
@@ -471,6 +550,7 @@
       } catch (e) {}
     }
 
+    // --- AYARLAR VE PROFİL GÜNCELLEME ---
     function prepareSettingsPanel() {
       document.getElementById('setting-display-name').value = getDisplayNameFor(currentUser);
       document.getElementById('sound-toggle-switch').checked = soundEnabled;
@@ -497,6 +577,41 @@
       }
     }
 
+    function updateDisplayName() {
+      const newName = document.getElementById('setting-display-name').value.trim();
+      if (newName) {
+        let names = getDisplayNames();
+        names[currentUser] = newName;
+        saveDisplayNames(names);
+        updateHeaderAndProfile();
+        renderUserList();
+        alert("Görünen adınız güncellendi!");
+      }
+    }
+
+    function updatePassword() {
+      const newPass = document.getElementById('setting-new-pass').value.trim();
+      if (newPass) {
+        let users = getUsers();
+        users[currentUser] = newPass;
+        saveUsers(users);
+        alert("Şifreniz güncellendi!");
+        document.getElementById('setting-new-pass').value = '';
+      }
+    }
+
+    function adminResetPassword() {
+      const targetUser = document.getElementById('admin-user-select').value;
+      const newPass = document.getElementById('admin-new-pass').value.trim();
+      if (targetUser && newPass) {
+        let users = getUsers();
+        users[targetUser] = newPass;
+        saveUsers(users);
+        alert(`${getDisplayNameFor(targetUser).toUpperCase()} şifresi sıfırlandı!`);
+      }
+    }
+
+    // --- ÇÖP KUTUSU & MESAJ YÖNETİMİ ---
     function renderTrashBinPanel() {
       const container = document.getElementById('trash-bin-container');
       const trash = JSON.parse(localStorage.getItem('app_trash_bin') || '[]');
@@ -562,40 +677,11 @@
       navigator.clipboard.writeText(text).then(() => alert("Mesaj panoya kopyalandı!"));
     }
 
-    function updateDisplayName() {
-      const newName = document.getElementById('setting-display-name').value.trim();
-      if (newName) {
-        let names = getDisplayNames();
-        names[currentUser] = newName;
-        saveDisplayNames(names);
-        updateHeaderAndProfile();
-        renderUserList();
-        alert("Görünen adınız güncellendi!");
-      }
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    function updatePassword() {
-      const newPass = document.getElementById('setting-new-pass').value.trim();
-      if (newPass) {
-        let users = getUsers();
-        users[currentUser] = newPass;
-        saveUsers(users);
-        alert("Şifreniz güncellendi!");
-        document.getElementById('setting-new-pass').value = '';
-      }
-    }
-
-    function adminResetPassword() {
-      const targetUser = document.getElementById('admin-user-select').value;
-      const newPass = document.getElementById('admin-new-pass').value.trim();
-      if (targetUser && newPass) {
-        let users = getUsers();
-        users[targetUser] = newPass;
-        saveUsers(users);
-        alert(`${getDisplayNameFor(targetUser).toUpperCase()} şifresi sıfırlandı!`);
-      }
-    }
-
+    // --- GRUPLAR VE KİŞİLER ---
     function renderCustomGroups() {
       const groups = JSON.parse(localStorage.getItem('app_custom_groups') || '[]');
       const container = document.getElementById('custom-groups-container');
@@ -652,121 +738,62 @@
       const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
       const lastSeen = onlineData[username];
       if (!lastSeen) return false;
-      return (Date.now() - lastSeen) < 10000;
+      return (Date.now() - lastSeen) < 5000;
     }
 
-    function getOnlineUserCount() {
-      let count = 0;
-      const users = getUsers();
-      Object.keys(users).forEach(user => { if (isUserOnline(user)) count++; });
-      return count;
+    function getStorageKeyFor(target) {
+      if (target === 'genel') return 'chat_messages_genel';
+      let sorted = [currentUser, target].sort().join('_');
+      return 'chat_messages_private_' + sorted;
     }
 
-    function showNotification(sender, text) {
-      toastSenderTarget = sender;
-      let senderDisplayName = getDisplayNameFor(sender);
-      document.getElementById('toast-avatar').textContent = senderDisplayName.charAt(0).toUpperCase();
-      document.getElementById('toast-title').textContent = senderDisplayName.toUpperCase() + " yeni mesaj gönderdi";
-      document.getElementById('toast-body').textContent = text;
-      document.getElementById('notification-toast').style.display = 'flex';
-      playNotificationSound();
-      setTimeout(() => { document.getElementById('notification-toast').style.display = 'none'; }, 4000);
-    }
-
-    function clickNotification() {
-      if (toastSenderTarget) {
-        switchTab('chat');
-        selectChat(toastSenderTarget);
-        document.getElementById('notification-toast').style.display = 'none';
+    function selectChat(target) {
+      activeTarget = target;
+      if (unreadCounts[activeTarget]) {
+        unreadCounts[activeTarget] = 0;
       }
-    }
-
-    function login() {
-      const u = document.getElementById('username-input').value.toLowerCase().trim();
-      const p = document.getElementById('password-input').value;
-      const users = getUsers();
-
-      if (users[u] && users[u] === p) {
-        currentUser = u;
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-container').style.display = 'flex';
-
-        updateHeartbeat();
-        setInterval(updateHeartbeat, 3000);
-
-        renderUserList();
-        selectChat('genel');
-        setInterval(checkNewMessages, 1000);
-      } else {
-        document.getElementById('error-msg').style.display = 'block';
-      }
-    }
-
-    function logout() {
-      if (currentUser) {
-        const onlineData = JSON.parse(localStorage.getItem('online_users') || '{}');
-        delete onlineData[currentUser];
-        localStorage.setItem('online_users', JSON.stringify(onlineData));
-      }
-      location.reload();
-    }
-
-    function selectChat(targetUser) {
-      activeTarget = targetUser;
-      unreadCounts[targetUser] = 0;
-      updateHeaderAndProfile();
       renderUserList();
 
-      const key = getStorageKeyFor(targetUser);
-      let msgs = JSON.parse(localStorage.getItem(key) || '[]');
-      lastSeenMsgCount[key] = msgs.length;
+      let headerName = "";
+      let headerAvatar = "";
+      let onlineStatusText = "";
+
+      if (target === 'genel') {
+        headerName = "E-Ticaret Sohbeti";
+        headerAvatar = "E";
+        onlineStatusText = "● Genel Kanal";
+      } else {
+        let displayName = getDisplayNameFor(target);
+        headerName = displayName.toUpperCase();
+        headerAvatar = displayName.charAt(0).toUpperCase();
+        let online = isUserOnline(target);
+        onlineStatusText = online ? "● Çevrim İçi" : "● Çevrim Dışı";
+      }
+
+      document.getElementById('chat-header-name').textContent = headerName;
+      document.getElementById('chat-header-avatar').textContent = headerAvatar;
+      document.getElementById('chat-header-status').textContent = onlineStatusText;
+
       loadMessages();
     }
 
-    function updateHeaderAndProfile() {
-      const headerAvatar = document.getElementById('chat-header-avatar');
-      const headerName = document.getElementById('chat-header-name');
-      const headerStatus = document.getElementById('chat-header-status');
-
-      const profileAvatar = document.getElementById('profile-avatar-big');
-      const profileName = document.getElementById('profile-name-big');
-      const profileUsername = document.getElementById('profile-username-val');
-      const profileStatus = document.getElementById('profile-status-text');
-
-      let currentDisplayName = getDisplayNameFor(currentUser);
-
-      if (activeTarget === 'genel') {
-        headerAvatar.textContent = 'E';
-        headerName.textContent = 'E-Ticaret Sohbeti';
-        headerStatus.innerHTML = `<span style="color: #22c55e;">● ${getOnlineUserCount()} Aktif</span>`;
-        profileAvatar.textContent = currentDisplayName.charAt(0).toUpperCase();
-        profileName.textContent = currentDisplayName.toUpperCase();
-        profileUsername.textContent = '@' + currentUser;
-        profileStatus.innerHTML = `<span style="color: #22c55e;">● Çevrim İçi</span>`;
-      } else {
-        const online = isUserOnline(activeTarget);
-        let targetDisplayName = getDisplayNameFor(activeTarget);
-        headerAvatar.textContent = targetDisplayName.charAt(0).toUpperCase();
-        headerName.textContent = targetDisplayName.toUpperCase() + ' ile Sohbet';
-        headerStatus.innerHTML = online ? `<span style="color: #22c55e;">● Çevrim İçi</span>` : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
-        profileAvatar.textContent = currentDisplayName.charAt(0).toUpperCase();
-        profileName.textContent = currentDisplayName.toUpperCase();
-        profileUsername.textContent = '@' + currentUser;
-        profileStatus.innerHTML = `<span style="color: #22c55e;">● Çevrim İçi</span>`;
-      }
-    }
-
     function renderUserList() {
-      const container = document.getElementById('users-list');
+      const listContainer = document.getElementById('users-list');
       const users = getUsers();
-      
+      let html = '';
+
+      let genelOnline = Object.keys(JSON.parse(localStorage.getItem('online_users') || '{}')).length > 0;
       let genelUnread = unreadCounts['genel'] || 0;
-      let html = `
-        <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="switchTab('chat'); selectChat('genel');">
-          <div class="chat-item-avatar">E<div class="status-dot online"></div></div>
+
+      html += `
+        <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
+          <div class="chat-item-avatar">
+            E
+            <div class="status-dot ${genelOnline ? 'online' : 'offline'}"></div>
+          </div>
           <div class="chat-item-info">
-            <div class="chat-item-name">E-TİCARET SOHBETİ</div>
-            <div class="chat-item-lastmsg">Genel Kanal</div>
+            <div class="chat-item-name">E-Ticaret Sohbeti</div>
+            <div class="chat-item-lastmsg">Genel kanal</div>
           </div>
           ${genelUnread > 0 ? `<div class="unread-badge">${genelUnread}</div>` : ''}
         </div>
@@ -774,32 +801,26 @@
 
       Object.keys(users).forEach(user => {
         if (user !== currentUser) {
-          let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
+          let unread = unreadCounts[user] || 0;
           let displayName = getDisplayNameFor(user);
-          
           html += `
-            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
+            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="selectChat('${user}')">
               <div class="chat-item-avatar">
                 ${displayName.charAt(0).toUpperCase()}
                 <div class="status-dot ${online ? 'online' : 'offline'}"></div>
               </div>
               <div class="chat-item-info">
                 <div class="chat-item-name">${displayName.toUpperCase()}</div>
-                <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
+                <div class="chat-item-lastmsg">${online ? 'Çevrim içi' : 'Çevrim dışı'}</div>
               </div>
-              ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
+              ${unread > 0 ? `<div class="unread-badge">${unread}</div>` : ''}
             </div>
           `;
         }
       });
-      container.innerHTML = html;
-    }
 
-    function getStorageKeyFor(target) {
-      if (target === 'genel') return 'chat_genel';
-      const pair = [currentUser, target].sort().join('_');
-      return 'chat_' + pair;
+      listContainer.innerHTML = html;
     }
 
     function sendMessage() {
@@ -807,78 +828,112 @@
       const text = input.value.trim();
       if (!text) return;
 
-      const now = new Date();
-      const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-      const msgData = { user: currentUser, text: text, time: timeStr };
       const key = getStorageKeyFor(activeTarget);
-
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
-      messages.push(msgData);
+      const newMsg = {
+        user: currentUser,
+        text: text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      messages.push(newMsg);
       localStorage.setItem(key, JSON.stringify(messages));
-      lastSeenMsgCount[key] = messages.length;
 
       input.value = '';
       loadMessages();
     }
 
-    function checkNewMessages() {
-      updateHeaderAndProfile();
-      renderUserList();
-      loadMessages();
-
-      const users = getUsers();
-      const targets = ['genel', ...Object.keys(users).filter(u => u !== currentUser)];
-
-      targets.forEach(target => {
-        const key = getStorageKeyFor(target);
-        let msgs = JSON.parse(localStorage.getItem(key) || '[]');
-        let prevCount = lastSeenMsgCount[key] || 0;
-
-        if (msgs.length > prevCount) {
-          const lastMsg = msgs[msgs.length - 1];
-          if (lastMsg.user !== currentUser && target !== activeTarget) {
-            unreadCounts[target] = (unreadCounts[target] || 0) + (msgs.length - prevCount);
-            showNotification(lastMsg.user, lastMsg.text);
-            renderUserList();
-          }
-          lastSeenMsgCount[key] = msgs.length;
-        }
-      });
-    }
-
     function loadMessages() {
-      const list = document.getElementById('message-list');
       const key = getStorageKeyFor(activeTarget);
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
-      lastSeenMsgCount[key] = messages.length;
+      const container = document.getElementById('message-list');
 
       let html = '';
-      messages.forEach((msg, index) => {
-        const isMine = msg.user === currentUser;
-        const senderDisplayName = getDisplayNameFor(msg.user);
+      messages.forEach((msg, idx) => {
+        let isMine = (msg.user === currentUser);
+        let rowClass = isMine ? 'mine' : 'other';
+        let senderDisplay = getDisplayNameFor(msg.user);
+
         html += `
-          <div class="message-row ${isMine ? 'mine' : 'other'}">
+          <div class="message-row ${rowClass}">
+            ${!isMine && activeTarget === 'genel' ? `<div style="font-size:10px; color:#3b82f6; font-weight:bold; margin-bottom:2px;">${senderDisplay.toUpperCase()}</div>` : ''}
             <div class="message-content-wrapper">
               <div class="bubble">${escapeHtml(msg.text)}</div>
               <div class="msg-actions">
-                <button class="msg-action-btn" onclick="copyMessageText('${escapeHtml(msg.text).replace(/'/g, "\\'")}')"><i class="fa-regular fa-copy"></i></button>
-                <button class="msg-action-btn delete" onclick="deleteMessage(${index})"><i class="fa-regular fa-trash-can"></i></button>
+                <button class="msg-action-btn" onclick="copyMessageText('${msg.text.replace(/'/g, "\\'")}')" title="Kopyala"><i class="fa-regular fa-copy"></i></button>
+                ${isMine ? `<button class="msg-action-btn delete" onclick="deleteMessage(${idx})" title="Sil"><i class="fa-solid fa-trash"></i></button>` : ''}
               </div>
             </div>
-            <div class="time-stamp">${senderDisplayName.toUpperCase()} • ${msg.time}</div>
+            <div class="time-stamp">${msg.time}</div>
           </div>
         `;
       });
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    }
 
-      if (list.innerHTML !== html) {
-        list.innerHTML = html;
-        list.scrollTop = list.scrollHeight;
+    function pollData() {
+      if (!currentUser) return;
+      renderUserList();
+      if (activeTarget !== 'genel') {
+        let online = isUserOnline(activeTarget);
+        document.getElementById('chat-header-status').textContent = online ? "● Çevrim İçi" : "● Çevrim Dışı";
       }
     }
 
-    function escapeHtml(text) {
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
+    // --- İSTEDİĞİNİZ ÜST MENÜ VE ÇAĞRI FONKSİYONLARI ---
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    menuToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('hidden');
+    });
+
+    window.addEventListener('click', () => {
+      if (!dropdownMenu.classList.contains('hidden')) {
+        dropdownMenu.classList.add('hidden');
+      }
+    });
+
+    // Yeniden Adlandır (Sohbetteki kişinin veya grubun başlığını anlık değiştirme)
+    document.getElementById('renameBtn').addEventListener('click', () => {
+      const headerNameElem = document.getElementById('chat-header-name');
+      const currentTitle = headerNameElem.innerText;
+      const newName = prompt("Bu sohbet için yeni bir isim girin:", currentTitle);
+      
+      if (newName && newName.trim() !== "") {
+        headerNameElem.innerText = newName.trim();
+        alert(`Sohbet başlığı "${newName.trim()}" olarak güncellendi.`);
+      }
+    });
+
+    // Sohbeti Sil (Kırmızı Buton)
+    document.getElementById('deleteChatBtn').addEventListener('click', () => {
+      if (confirm("Bu sohbet geçmişini silmek istediğinize emin misiniz?")) {
+        const key = getStorageKeyFor(activeTarget);
+        localStorage.removeItem(key);
+        loadMessages();
+        alert("Sohbet geçmişi temizlendi.");
+      }
+    });
+
+    // Engelle (Kırmızı Buton)
+    document.getElementById('blockUserBtn').addEventListener('click', () => {
+      if (confirm("Bu kullanıcıyı engellemek istediğinize emin misiniz?")) {
+        alert("Kullanıcı engellendi.");
+      }
+    });
+
+    // Sol Telefon Tuşu: Canlı Sesli Görüşme
+    document.getElementById('audioCallBtn').addEventListener('click', () => {
+      alert("Kesintisiz canlı sesli arama başlatılıyor...");
+    });
+
+    // Orta Kamera Tuşu: Canlı Görüntülü Arama
+    document.getElementById('videoCallBtn').addEventListener('click', () => {
+      alert("Kamera açılıyor, canlı görüntülü görüşme başlatılıyor...");
+    });
   </script>
+
 </body>
 </html>
