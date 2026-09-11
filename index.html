@@ -57,7 +57,7 @@
 
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-    .form-group input[type="text"], .form-group input[type="password"], .form-group select { width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #232936; border-radius: 6px; color: #fff; outline: none; font-size: 13px; }
+    .form-group input[type="text"], .form-group input[type="password"], .form-group select, .form-group input[type="file"] { width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #232936; border-radius: 6px; color: #fff; outline: none; font-size: 13px; }
 
     .btn-primary { padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
     .btn-primary:hover { background: #1d4ed8; }
@@ -218,7 +218,7 @@
             <div id="dropdownMenu" class="dropdown-menu hidden">
               <button id="renameBtn" class="menu-item white-text">Yeniden Adlandır</button>
               <button id="deleteChatBtn" class="menu-item red-text">Sohbeti Sil</button>
-              <button id="blockUserBtn" class="menu-item red-text">Engelle</button>
+              <button id="blockUserBtn" class="menu-item red-text" onclick="blockCurrentTarget()">Engelle</button>
             </div>
           </div>
         </div>
@@ -263,27 +263,52 @@
 
       <!-- BİLDİRİM SESLERİ KARTI -->
       <div class="settings-card" style="cursor:default;">
-        <div class="settings-header" onclick="toggleSoundSelect()">
+        <div class="settings-header">
           <span><i class="fa-solid fa-bell" style="margin-right:8px; color:#3b82f6;"></i> Bildirim Sesleri</span>
-          <i class="fa-solid fa-chevron-down"></i>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 11px; color: #94a3b8;" id="sound-status-label">Açık</span>
+            <label class="switch">
+              <input type="checkbox" id="notification-toggle" checked onchange="toggleNotificationSound(this.checked)">
+              <span class="slider"></span>
+            </label>
+            <i class="fa-solid fa-chevron-down" onclick="toggleSoundSelect()" style="margin-left:8px; cursor:pointer;"></i>
+          </div>
         </div>
-        <div class="sound-select-box" id="sound-select-box">
+
+        <div class="sound-select-box" id="sound-select-box" style="display:block;">
           <div class="form-group">
-            <label>Mesaj Bildirimi Sesi:</label>
-            <select id="notification-sound-select">
-              <option value="default">Varsayılan Zil Sesi</option>
-              <option value="classic">Klasik Bip</option>
-              <option value="digital">Dijital Pop</option>
-              <option value="soft">Yumuşak Melodi</option>
+            <label>Bildirim Sesi Tarzı Seçin:</label>
+            <select id="notification-sound-select" onchange="playSelectedSound()">
+              <option value="cyber">Siber / Tekno (Bip)</option>
+              <option value="arcade">Arcade / Oyun (Pop)</option>
+              <option value="soft">Soft / Rahatlatıcı (Melodi)</option>
               <option value="echo">Yankılı Uyarı</option>
-              <option value="chirp">Kuş Sesi</option>
+              <option value="chirp">Kuş Esintisi</option>
               <option value="crystal">Kristal Tını</option>
               <option value="cosmic">Kozmik Dalga</option>
               <option value="radar">Radyo Bip</option>
-              <option value="breeze">Rüzgar Esintisi</option>
-              <option value="gentle">Zarif Zil</option>
+              <option value="breeze">Zarif Esinti</option>
+              <option value="office">Klasik / Ofis</option>
             </select>
           </div>
+
+          <div class="form-group" style="margin-top: 15px; background: #0b0e14; padding: 12px; border-radius: 8px; border: 1px dashed #232936;">
+            <label style="color: #3b82f6; font-weight: bold;"><i class="fa-solid fa-file-audio"></i> Kendi Ses Dosyanı Yükle (.mp3, .wav):</label>
+            <input type="file" id="custom-sound-file" accept="audio/*" onchange="handleCustomSoundUpload(event)">
+            <div id="custom-sound-info" style="font-size: 11px; color: #22c55e; margin-top: 6px; display: none;"></div>
+          </div>
+
+          <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="playSelectedSound()">
+            <i class="fa-solid fa-play"></i> Sesi Test Et
+          </button>
+        </div>
+      </div>
+
+      <!-- ENGELLENENLER BÖLÜMÜ -->
+      <div class="settings-card" style="cursor:default;">
+        <div style="font-weight:bold; margin-bottom:12px; color:#ef4444;"><i class="fa-solid fa-user-slash" style="margin-right:8px;"></i> Engellenen Kullanıcılar</div>
+        <div id="blocked-users-list">
+          <!-- Dinamik olarak dolacak -->
         </div>
       </div>
 
@@ -311,7 +336,7 @@
         <button class="btn-primary" onclick="changeMyPassword()">Şifreyi Güncelle</button>
       </div>
 
-      <!-- ADMIN ŞİFRE SIFIRLAMA PANELİ (YALNIZCA ADMİN GÖRÜR) -->
+      <!-- ADMIN ŞİFRE SIFIRLAMA PANELİ -->
       <div class="settings-card" id="admin-password-reset-card" style="cursor:default; display:none; border-color: #ef4444;">
         <div style="font-weight:bold; margin-bottom:12px; color: #ef4444;"><i class="fa-solid fa-user-shield" style="margin-right:8px;"></i> Admin Panel: Kullanıcı Şifre Sıfırlama</div>
         <div class="form-group">
@@ -376,6 +401,72 @@
       return names[username] ? names[username] : username;
     }
 
+    /* ENGELLENENLER YÖNETİMİ */
+    function getBlockedUsers() {
+      const blocked = JSON.parse(localStorage.getItem('app_blocked_users')) || {};
+      return blocked[currentUser] || [];
+    }
+
+    function saveBlockedUsers(list) {
+      const blocked = JSON.parse(localStorage.getItem('app_blocked_users')) || {};
+      blocked[currentUser] = list;
+      localStorage.setItem('app_blocked_users', JSON.stringify(blocked));
+    }
+
+    function isBlocked(username) {
+      return getBlockedUsers().includes(username);
+    }
+
+    function blockCurrentTarget() {
+      if (activeTarget === 'genel') {
+        alert("Genel sohbet kanalı engellenemez!");
+        return;
+      }
+      if (confirm(`${getDisplayNameFor(activeTarget).toUpperCase()} kullanıcısını engellemek istediğinize emin misiniz?`)) {
+        let blockedList = getBlockedUsers();
+        if (!blockedList.includes(activeTarget)) {
+          blockedList.push(activeTarget);
+          saveBlockedUsers(blockedList);
+        }
+        alert("Kullanıcı engellendi ve listelerinizden kaldırıldı.");
+        selectChat('genel');
+        renderUserList();
+        renderContactsPanel();
+      }
+    }
+
+    function unblockUser(username) {
+      let blockedList = getBlockedUsers();
+      blockedList = blockedList.filter(u => u !== username);
+      saveBlockedUsers(blockedList);
+      renderBlockedUsersList();
+      renderUserList();
+      renderContactsPanel();
+      alert(`${getDisplayNameFor(username).toUpperCase()} kişisinin engeli kaldırıldı.`);
+    }
+
+    function renderBlockedUsersList() {
+      const container = document.getElementById('blocked-users-list');
+      const blockedList = getBlockedUsers();
+
+      if (blockedList.length === 0) {
+        container.innerHTML = `<div style="font-size: 12px; color: #64748b;">Henüz engellenmiş bir kullanıcı yok.</div>`;
+        return;
+      }
+
+      let html = '';
+      blockedList.forEach(user => {
+        let displayName = getDisplayNameFor(user);
+        html += `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e2430;">
+            <span style="font-size: 13px; font-weight: bold;">${displayName.toUpperCase()} (@${user})</span>
+            <button class="btn-primary" style="padding: 4px 8px; font-size: 11px; background: #22c55e;" onclick="unblockUser('${user}')">Engeli Kaldır</button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
     if (!localStorage.getItem('app_users')) {
       saveUsers(DEFAULT_USERS);
     }
@@ -384,6 +475,8 @@
     let activeTarget = "genel";
     let unreadCounts = {};
     let localStream = null;
+    let customAudioData = null;
+    let isSoundEnabled = true;
 
     function login() {
       const uInput = document.getElementById('username-input').value.trim().toLowerCase();
@@ -446,8 +539,8 @@
 
     function prepareSettingsPanel() {
       document.getElementById('setting-display-name').value = getDisplayNameFor(currentUser);
+      renderBlockedUsersList();
       
-      // Admin kartının görünürlüğünü kontrol et
       if (currentUser === "admin") {
         document.getElementById('admin-password-reset-card').style.display = 'block';
       } else {
@@ -458,6 +551,66 @@
     function toggleSoundSelect() {
       const box = document.getElementById('sound-select-box');
       box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function toggleNotificationSound(enabled) {
+      isSoundEnabled = enabled;
+      document.getElementById('sound-status-label').textContent = enabled ? "Açık" : "Kapalı";
+    }
+
+    function handleCustomSoundUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          customAudioData = e.target.result;
+          const infoBox = document.getElementById('custom-sound-info');
+          infoBox.style.display = 'block';
+          infoBox.textContent = `✓ "${file.name}" yüklendi ve varsayılan ses olarak ayarlandı.`;
+          playSelectedSound();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function playSelectedSound() {
+      if (!isSoundEnabled) return;
+
+      if (customAudioData) {
+        const audio = new Audio(customAudioData);
+        audio.play().catch(e => console.log(e));
+        return;
+      }
+
+      const style = document.getElementById('notification-sound-select').value;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      let freq = 440;
+      let duration = 0.2;
+
+      switch(style) {
+        case 'cyber': freq = 880; osc.type = 'sawtooth'; duration = 0.15; break;
+        case 'arcade': freq = 600; osc.type = 'square'; duration = 0.1; break;
+        case 'soft': freq = 320; osc.type = 'sine'; duration = 0.4; break;
+        case 'echo': freq = 520; osc.type = 'triangle'; duration = 0.3; break;
+        case 'chirp': freq = 1200; osc.type = 'sine'; duration = 0.08; break;
+        case 'crystal': freq = 950; osc.type = 'sine'; duration = 0.25; break;
+        case 'cosmic': freq = 220; osc.type = 'sawtooth'; duration = 0.5; break;
+        case 'radar': freq = 750; osc.type = 'square'; duration = 0.2; break;
+        case 'breeze': freq = 400; osc.type = 'triangle'; duration = 0.35; break;
+        case 'office': freq = 500; osc.type = 'sine'; duration = 0.2; break;
+      }
+
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
     }
 
     function updateDisplayName() {
@@ -563,7 +716,8 @@
       `;
 
       Object.keys(users).forEach(user => {
-        if (user !== currentUser) {
+        // KULLANICI ENGELLİYSE SOHBET LİSTESİNDE GÖSTERME
+        if (user !== currentUser && !isBlocked(user)) {
           let online = isUserOnline(user);
           let displayName = getDisplayNameFor(user);
           html += `
@@ -594,6 +748,7 @@
       });
       localStorage.setItem(key, JSON.stringify(messages));
       input.value = '';
+      playSelectedSound();
       loadMessages();
     }
 
@@ -677,7 +832,8 @@
       const users = getUsers();
       let html = '';
       Object.keys(users).forEach(user => {
-        if (user !== currentUser) {
+        // KULLANICI ENGELLİYSE KİŞİLER LİSTESİNDE GÖSTERME
+        if (user !== currentUser && !isBlocked(user)) {
           let online = isUserOnline(user);
           let displayName = getDisplayNameFor(user);
           html += `
@@ -765,12 +921,6 @@
       if (confirm("Bu sohbet geçmişini silmek istediğinize emin misiniz?")) {
         localStorage.removeItem(getStorageKeyFor(activeTarget));
         loadMessages();
-      }
-    });
-
-    document.getElementById('blockUserBtn').addEventListener('click', () => {
-      if (confirm("Bu kullanıcıyı engellemek istediğinize emin misiniz?")) {
-        alert("Kullanıcı engellendi.");
       }
     });
   </script>
