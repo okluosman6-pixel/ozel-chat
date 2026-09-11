@@ -77,13 +77,20 @@
     .white-text { color: #ffffff !important; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
     .red-text { color: #ff4d4d !important; }
 
+    /* MESAJ BALONLARI VE KONTROLLERİ */
     .messages-container { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-    .message-row { display: flex; flex-direction: column; max-width: 65%; position: relative; }
+    .message-row { display: flex; flex-direction: column; max-width: 65%; position: relative; group: true; }
     .message-row.mine { align-self: flex-end; }
     .message-row.other { align-self: flex-start; }
     
-    .message-content-wrapper { display: flex; align-items: flex-end; gap: 8px; }
+    .message-content-wrapper { display: flex; align-items: center; gap: 8px; }
     .message-row.mine .message-content-wrapper { flex-direction: row-reverse; }
+
+    .message-actions { display: none; gap: 4px; }
+    .message-row:hover .message-actions { display: flex; }
+    .msg-action-btn { background: #1e2430; border: 1px solid #232936; color: #94a3b8; border-radius: 4px; width: 26px; height: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: 0.2s; }
+    .msg-action-btn:hover { color: #fff; background: #2563eb; }
+    .msg-action-btn.delete:hover { background: #ef4444; }
 
     .bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
     .message-row.mine .bubble { background: #2563eb; color: white; border-bottom-right-radius: 4px; }
@@ -109,23 +116,38 @@
     .chat-list-header { padding: 16px 20px; border-bottom: 1px solid #1e2430; font-size: 16px; font-weight: 600; background: #11151c; }
     .chat-list { overflow-y: auto; flex: 1; }
     
+    /* SOHBET LİSTESİ VE AKSİYONLAR */
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; position: relative; }
     .chat-item:hover, .chat-item.active { background: #1e2430; }
-    .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; }
+    .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; flex-shrink: 0; }
     
     .status-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
     .status-dot.online { background: #22c55e; }
     .status-dot.offline { background: #64748b; }
 
     .chat-item-info { flex: 1; overflow: hidden; }
-    .chat-item-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
-    .chat-item-lastmsg { font-size: 12px; color: #94a3b8; }
+    .chat-item-top { display: flex; justify-content: space-between; align-items: center; }
+    .chat-item-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-item-lastmsg { font-size: 12px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+    .badge { background: #ef4444; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+    .pin-icon { color: #3b82f6; font-size: 11px; margin-right: 4px; }
+
+    /* SOHBET LİSTESİ ÜÇ NOKTA MENÜSÜ */
+    .item-menu-btn { background: transparent; border: none; color: #64748b; cursor: pointer; padding: 4px 8px; font-size: 14px; border-radius: 4px; }
+    .item-menu-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .item-dropdown { position: absolute; right: 20px; top: 40px; background: #1e2430; border: 1px solid #2b3445; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 50; display: none; flex-direction: column; overflow: hidden; width: 140px; }
+    .item-dropdown.show { display: flex; }
+    .item-dropdown-btn { border: none; background: transparent; color: #e1e7ed; padding: 8px 12px; text-align: left; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .item-dropdown-btn:hover { background: #2563eb; }
+    .item-dropdown-btn.danger { color: #ef4444; }
+    .item-dropdown-btn.danger:hover { background: #ef4444; color: #fff; }
 
     .generic-list-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: #151921; border: 1px solid #1e2430; border-radius: 12px; margin-bottom: 12px; position: relative; }
     .generic-list-item-left { display: flex; align-items: center; gap: 16px; }
     .generic-list-item i { font-size: 24px; color: #3b82f6; }
 
-    /* YUKARIDA ÇIKAN ARAMA BİLDİRİMİ / EKRANI */
+    /* YUKARIDA ÇIKAN ARAMA BİLDİRİMİ */
     #top-call-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #1e293b; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 20px; display: none; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(0,0,0,0.6); z-index: 1000; animation: slideDown 0.3s ease; }
     @keyframes slideDown { from { top: -60px; opacity: 0; } to { top: 15px; opacity: 1; } }
 
@@ -136,9 +158,9 @@
     .call-bar-btn.accept { background: #22c55e; }
     .call-bar-btn.decline { background: #ef4444; }
 
-    /* ARAMA MODALI VE ÇİFT VİDEO BÖLÜMÜ */
+    /* ARAMA MODALI */
     #call-modal { position: fixed; inset: 0; background: rgba(11, 14, 20, 0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-    .call-box { background: #151921; border: 1px solid #1e2430; border-radius: 16px; padding: 24px; width: 600px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+    .call-box { background: #151921; border: 1px solid #1e2430; border-radius: 16px; padding: 24px; width: 620px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
     .call-box h3 { margin-bottom: 15px; color: #3b82f6; font-size: 20px; }
     
     .video-grid { display: flex; gap: 12px; margin-bottom: 20px; justify-content: center; }
@@ -146,8 +168,8 @@
     .video-wrapper video { width: 100%; height: 100%; object-fit: cover; }
     .video-label { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #fff; }
 
-    .call-controls { display: flex; justify-content: center; gap: 15px; }
-    .call-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .call-controls { display: flex; justify-content: center; gap: 12px; }
+    .call-btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; }
     .call-btn.end { background: #ef4444; color: white; }
     .call-btn.end:hover { background: #dc2626; }
   </style>
@@ -169,22 +191,17 @@
   <div id="call-modal">
     <div class="call-box">
       <h3 id="call-title">Canlı Görüşme</h3>
-      
       <div class="video-grid">
-        <!-- Karşı Tarafın Görüntüsü -->
         <div class="video-wrapper">
           <video id="remote-video" autoplay playsinline></video>
           <div class="video-label" id="remote-label">Karşı Taraf</div>
         </div>
-        <!-- Kendi Görüntün -->
         <div class="video-wrapper">
           <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);"></video>
-          <div class="video-label">Sen</div>
+          <div class="video-label" id="local-video-label">Sen</div>
         </div>
       </div>
-
       <div id="audio-visualizer-text" style="color: #22c55e; margin-bottom: 20px; font-weight: 500; display: none;">🎤 Mikrofon aktif, ses iletiliyor...</div>
-      
       <div class="call-controls">
         <button class="call-btn end" onclick="endCall()"><i class="fa-solid fa-phone-slash"></i> Aramayı Sonlandır</button>
       </div>
@@ -215,7 +232,6 @@
     <!-- ANA SOHBET ALANI -->
     <main class="main-chat-area" id="panel-chat">
       
-      <!-- ÜSTTE ÇIKAN ARAMA BİLDİRİM / KONTROL BARI -->
       <div id="top-call-bar">
         <div class="call-bar-info">
           <div class="call-bar-avatar" id="call-bar-avatar">E</div>
@@ -243,7 +259,6 @@
           <button id="audioCallBtn" onclick="initiateCall(false)" title="Canlı Sesli Görüşme">
             <i class="fa-solid fa-phone"></i>
           </button>
-          
           <button id="videoCallBtn" onclick="initiateCall(true)" title="Canlı Görüntülü Görüşme">
             <i class="fa-solid fa-video"></i>
           </button>
@@ -252,7 +267,6 @@
             <button id="menuToggleBtn" title="Seçenekler">
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
-
             <div id="dropdownMenu" class="dropdown-menu hidden">
               <button id="renameBtn" class="menu-item white-text">Yeniden Adlandır</button>
               <button id="deleteChatBtn" class="menu-item red-text">Sohbeti Sil</button>
@@ -336,13 +350,11 @@
         </div>
       </div>
 
-      <!-- ENGELLENENLER BÖLÜMÜ -->
       <div class="settings-card" style="cursor:default;">
         <div style="font-weight:bold; margin-bottom:12px; color:#ef4444;"><i class="fa-solid fa-user-slash" style="margin-right:8px;"></i> Engellenen Kullanıcılar</div>
         <div id="blocked-users-list"></div>
       </div>
 
-      <!-- İSİM DEĞİŞTİRME -->
       <div class="settings-card" style="cursor:default;">
         <div style="font-weight:bold; margin-bottom:12px;"><i class="fa-solid fa-id-card" style="margin-right:8px; color:#3b82f6;"></i> Adını Değiştir</div>
         <div class="form-group">
@@ -352,7 +364,6 @@
         <button class="btn-primary" onclick="updateDisplayName()">Adı Güncelle</button>
       </div>
 
-      <!-- ŞİFRE DEĞİŞTİRME -->
       <div class="settings-card" style="cursor:default;">
         <div style="font-weight:bold; margin-bottom:12px;"><i class="fa-solid fa-key" style="margin-right:8px; color:#3b82f6;"></i> Şifreni Değiştir</div>
         <div class="form-group">
@@ -366,7 +377,6 @@
         <button class="btn-primary" onclick="changeMyPassword()">Şifreyi Güncelle</button>
       </div>
 
-      <!-- ADMIN PANEL -->
       <div class="settings-card" id="admin-password-reset-card" style="cursor:default; display:none; border-color: #ef4444;">
         <div style="font-weight:bold; margin-bottom:12px; color: #ef4444;"><i class="fa-solid fa-user-shield" style="margin-right:8px;"></i> Admin Panel: Kullanıcı Şifre Sıfırlama</div>
         <div class="form-group">
@@ -379,7 +389,6 @@
         </div>
         <button class="btn-danger" onclick="adminResetPassword()">Kullanıcı Şifresini Sıfırla</button>
       </div>
-
     </section>
 
     <!-- SAĞ PANEL -->
@@ -426,6 +435,28 @@
     function saveDisplayNames(names) { localStorage.setItem('app_display_names', JSON.stringify(names)); }
     function getDisplayNameFor(username) { return getDisplayNames()[username] || username; }
 
+    function getPinnedChats() {
+      const pins = JSON.parse(localStorage.getItem('app_pinned_chats')) || {};
+      return pins[currentUser] || [];
+    }
+    function savePinnedChats(list) {
+      const pins = JSON.parse(localStorage.getItem('app_pinned_chats')) || {};
+      pins[currentUser] = list;
+      localStorage.setItem('app_pinned_chats', JSON.stringify(pins));
+    }
+    function isPinned(target) { return getPinnedChats().includes(target); }
+
+    function togglePin(target) {
+      let list = getPinnedChats();
+      if (list.includes(target)) {
+        list = list.filter(item => item !== target);
+      } else {
+        list.push(target);
+      }
+      savePinnedChats(list);
+      renderUserList();
+    }
+
     function getBlockedUsers() {
       const blocked = JSON.parse(localStorage.getItem('app_blocked_users')) || {};
       return blocked[currentUser] || [];
@@ -437,15 +468,19 @@
     }
     function isBlocked(username) { return getBlockedUsers().includes(username); }
 
-    function blockCurrentTarget() {
-      if (activeTarget === 'genel') { alert("Genel sohbet kanalı engellenemez!"); return; }
-      if (confirm(`${getDisplayNameFor(activeTarget).toUpperCase()} engellensin mi?`)) {
+    function blockUser(username) {
+      if (username === 'genel') { alert("Genel sohbet kanalı engellenemez!"); return; }
+      if (confirm(`${getDisplayNameFor(username).toUpperCase()} engellensin mi?`)) {
         let blockedList = getBlockedUsers();
-        if (!blockedList.includes(activeTarget)) { blockedList.push(activeTarget); saveBlockedUsers(blockedList); }
-        selectChat('genel');
+        if (!blockedList.includes(username)) { blockedList.push(username); saveBlockedUsers(blockedList); }
+        if (activeTarget === username) selectChat('genel');
         renderUserList();
         renderContactsPanel();
       }
+    }
+
+    function blockCurrentTarget() {
+      blockUser(activeTarget);
     }
 
     function unblockUser(username) {
@@ -475,7 +510,6 @@
 
     let currentUser = "";
     let activeTarget = "genel";
-    let unreadCounts = {};
     let customAudioData = null;
     let isSoundEnabled = true;
 
@@ -509,18 +543,25 @@
       updateHeaderAndProfile();
       renderUserList();
       selectChat('genel');
+      
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.item-dropdown').forEach(el => el.classList.remove('show'));
+      });
     }
 
-    /* SOCKET VE CANLI ARAMA SİNYALLEŞME SİSTEMİ */
     function setupSocketConnection() {
-      // Kamu/açık socket sinyal sunucusu bağlantısı
       socket = io("https://0.peerjs.com", { autoConnect: false }); 
       
-      // LocalStorage / Event tabanlı sinyalleşme yedekleme mekanizması
       window.addEventListener('storage', (e) => {
         if (e.key === 'rtc_signal_call_' + currentUser && e.newValue) {
           const signal = JSON.parse(e.newValue);
           handleIncomingSignal(signal);
+        }
+        if (e.key.startsWith('chat_messages_')) {
+          renderUserList();
+          if (e.key === getStorageKeyFor(activeTarget)) {
+            loadMessages();
+          }
         }
       });
     }
@@ -532,7 +573,6 @@
       }));
     }
 
-    /* TELEFON ÇALMA SESİ EFEKTİ */
     function startRingtone() {
       stopRingtone();
       playRingtoneBeep();
@@ -562,7 +602,6 @@
       osc.stop(ctx.currentTime + 1.2);
     }
 
-    /* ARAMA BAŞLATMA VE YÖNETİMİ */
     async function initiateCall(video) {
       if (activeTarget === 'genel') {
         alert("Genel kanalda birebir arama yapılamaz!");
@@ -575,7 +614,6 @@
       showTopCallBar(getDisplayNameFor(activeTarget), "Aranıyor...", false);
       startRingtone();
 
-      // Kamera / Mikrofon alımı
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideoCall });
         document.getElementById('local-video').srcObject = localStream;
@@ -585,7 +623,6 @@
         return;
       }
 
-      // RTCPeerConnection Başlat
       peerConnection = new RTCPeerConnection(rtcConfig);
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
@@ -609,7 +646,6 @@
       });
     }
 
-    /* GELEN SİNYALİ İŞLEME */
     async function handleIncomingSignal(signal) {
       if (isBlocked(signal.from)) return;
 
@@ -861,8 +897,24 @@
       return 'chat_messages_private_' + [currentUser, target].sort().join('_');
     }
 
+    function markAsRead(target) {
+      const key = getStorageKeyFor(target);
+      let messages = JSON.parse(localStorage.getItem(key) || '[]');
+      let updated = false;
+      messages.forEach(msg => {
+        if (msg.user !== currentUser && !msg.read) {
+          msg.read = true;
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem(key, JSON.stringify(messages));
+      }
+    }
+
     function selectChat(target) {
       activeTarget = target;
+      markAsRead(target);
       renderUserList();
 
       let headerName = target === 'genel' ? "E-Ticaret Sohbeti" : getDisplayNameFor(target).toUpperCase();
@@ -879,26 +931,93 @@
     function renderUserList() {
       const listContainer = document.getElementById('users-list');
       const users = getUsers();
-      let html = `<div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
-        <div class="chat-item-avatar">E<div class="status-dot online"></div></div>
-        <div class="chat-item-info"><div class="chat-item-name">E-Ticaret Sohbeti</div><div class="chat-item-lastmsg">Genel kanal</div></div>
-      </div>`;
+      let items = [];
 
+      // GENEL KANAL BİLGİSİ
+      const genelKey = getStorageKeyFor('genel');
+      const genelMsgs = JSON.parse(localStorage.getItem(genelKey) || '[]');
+      const genelLastMsg = genelMsgs.length > 0 ? genelMsgs[genelMsgs.length - 1] : null;
+      const genelUnread = genelMsgs.filter(m => m.user !== currentUser && !m.read).length;
+
+      items.push({
+        target: 'genel',
+        name: 'E-Ticaret Sohbeti',
+        avatar: 'E',
+        online: true,
+        lastMsgText: genelLastMsg ? genelLastMsg.text : 'Genel kanal',
+        lastMsgTime: genelLastMsg ? genelLastMsg.timestamp || 0 : 0,
+        unread: genelUnread,
+        isGroup: true
+      });
+
+      // BİREBİR KULLANICILAR
       Object.keys(users).forEach(user => {
         if (user !== currentUser && !isBlocked(user)) {
-          let online = isUserOnline(user);
-          let displayName = getDisplayNameFor(user);
-          html += `
-            <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="selectChat('${user}')">
-              <div class="chat-item-avatar">${displayName.charAt(0).toUpperCase()}<div class="status-dot ${online ? 'online' : 'offline'}"></div></div>
-              <div class="chat-item-info">
-                <div class="chat-item-name">${displayName.toUpperCase()}</div>
-                <div class="chat-item-lastmsg">${online ? 'Çevrim içi' : 'Çevrim dışı'}</div>
-              </div>
-            </div>`;
+          const key = getStorageKeyFor(user);
+          const msgs = JSON.parse(localStorage.getItem(key) || '[]');
+          const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+          const unread = msgs.filter(m => m.user !== currentUser && !m.read).length;
+
+          items.push({
+            target: user,
+            name: getDisplayNameFor(user).toUpperCase(),
+            avatar: getDisplayNameFor(user).charAt(0).toUpperCase(),
+            online: isUserOnline(user),
+            lastMsgText: lastMsg ? lastMsg.text : (isUserOnline(user) ? 'Çevrim içi' : 'Çevrim dışı'),
+            lastMsgTime: lastMsg ? lastMsg.timestamp || 0 : 0,
+            unread: unread,
+            isGroup: false
+          });
         }
       });
+
+      // SIRALAMA: Sabitlenenler en üste, kalanlar son mesaj zamanına göre
+      items.sort((a, b) => {
+        const aPinned = isPinned(a.target);
+        const bPinned = isPinned(b.target);
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        return b.lastMsgTime - a.lastMsgTime;
+      });
+
+      let html = '';
+      items.forEach(item => {
+        const pinned = isPinned(item.target);
+        html += `
+          <div class="chat-item ${activeTarget === item.target ? 'active' : ''}" onclick="selectChat('${item.target}')">
+            <div class="chat-item-avatar">${item.avatar}<div class="status-dot ${item.online ? 'online' : 'offline'}"></div></div>
+            <div class="chat-item-info">
+              <div class="chat-item-top">
+                <div class="chat-item-name">${pinned ? '<i class="fa-solid fa-thumbtack pin-icon"></i>' : ''}${item.name}</div>
+                ${item.unread > 0 ? `<span class="badge">${item.unread}</span>` : ''}
+              </div>
+              <div class="chat-item-lastmsg">${escapeHtml(item.lastMsgText)}</div>
+            </div>
+            
+            <button class="item-menu-btn" onclick="toggleItemMenu(event, '${item.target}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            
+            <div class="item-dropdown" id="dropdown-${item.target}">
+              <button class="item-dropdown-btn" onclick="event.stopPropagation(); togglePin('${item.target}')">
+                <i class="fa-solid fa-thumbtack"></i> ${pinned ? 'Kaldır' : 'Sabitle'}
+              </button>
+              ${!item.isGroup ? `
+                <button class="item-dropdown-btn danger" onclick="event.stopPropagation(); blockUser('${item.target}')">
+                  <i class="fa-solid fa-ban"></i> Engelle
+                </button>
+              ` : ''}
+            </div>
+          </div>`;
+      });
+
       listContainer.innerHTML = html;
+    }
+
+    function toggleItemMenu(event, target) {
+      event.stopPropagation();
+      const dropdown = document.getElementById(`dropdown-${target}`);
+      const isVisible = dropdown.classList.contains('show');
+      document.querySelectorAll('.item-dropdown').forEach(el => el.classList.remove('show'));
+      if (!isVisible) dropdown.classList.add('show');
     }
 
     function sendMessage() {
@@ -909,14 +1028,18 @@
       const key = getStorageKeyFor(activeTarget);
       let messages = JSON.parse(localStorage.getItem(key) || '[]');
       messages.push({
+        id: Date.now() + Math.random().toString(36).substr(2, 4),
         user: currentUser,
         text: text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now(),
+        read: false
       });
       localStorage.setItem(key, JSON.stringify(messages));
       input.value = '';
       playSelectedSound();
       loadMessages();
+      renderUserList();
     }
 
     function loadMessages() {
@@ -931,12 +1054,29 @@
           <div class="message-row ${isMine ? 'mine' : 'other'}">
             <div class="message-content-wrapper">
               <div class="bubble">${escapeHtml(msg.text)}</div>
+              <div class="message-actions">
+                <button class="msg-action-btn" title="Kopyala" onclick="copyMessage('${escapeHtml(msg.text)}')"><i class="fa-regular fa-copy"></i></button>
+                <button class="msg-action-btn delete" title="Sil" onclick="deleteMessage('${msg.id}')"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
             </div>
             <div class="time-stamp">${msg.time}</div>
           </div>`;
       });
       container.innerHTML = html;
       container.scrollTop = container.scrollHeight;
+    }
+
+    function copyMessage(text) {
+      navigator.clipboard.writeText(text);
+    }
+
+    function deleteMessage(msgId) {
+      const key = getStorageKeyFor(activeTarget);
+      let messages = JSON.parse(localStorage.getItem(key) || '[]');
+      messages = messages.filter(m => m.id !== msgId);
+      localStorage.setItem(key, JSON.stringify(messages));
+      loadMessages();
+      renderUserList();
     }
 
     function pollData() {
@@ -1037,6 +1177,7 @@
       if (confirm("Bu sohbet geçmişini silmek istediğinize emin misiniz?")) {
         localStorage.removeItem(getStorageKeyFor(activeTarget));
         loadMessages();
+        renderUserList();
       }
     });
   </script>
