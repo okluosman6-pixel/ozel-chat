@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Özel Sohbet Platformu</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #0b0e14; color: #e1e7ed; height: 100vh; overflow: hidden; }
@@ -21,7 +22,7 @@
     /* UYGULAMA ARAYÜZÜ */
     #app-container { display: none; height: 100vh; width: 100vw; position: relative; }
     
-    /* 1. SOL DAR MENÜ */
+    /* SOL DAR MENÜ */
     .nav-sidebar { width: 85px; background: #10141d; border-right: 1px solid #1e2430; display: flex; flex-direction: column; align-items: center; padding: 20px 0; justify-content: space-between; }
     .logo-icon { width: 40px; height: 40px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #fff; margin-bottom: 30px; }
     .nav-menu { display: flex; flex-direction: column; gap: 15px; width: 100%; }
@@ -29,25 +30,19 @@
     .nav-item i { font-size: 18px; }
     .nav-item.active, .nav-item:hover { color: #3b82f6; border-left: 3px solid #3b82f6; }
 
-    /* ÇIKIŞ BUTONU */
-    .exit-btn {
-      width: 75px; padding: 8px 4px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444; font-size: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; transition: all 0.2s ease; margin-bottom: 10px;
-    }
+    .exit-btn { width: 75px; padding: 8px 4px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444; font-size: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; transition: all 0.2s ease; margin-bottom: 10px; }
     .exit-btn:hover { background: #ef4444; color: #fff; }
-    .exit-btn i { font-size: 14px; }
 
     /* PANEL YÖNETİMİ */
     .content-panel { flex: 1; display: none; background: #0b0e14; padding: 30px; overflow-y: auto; }
     .content-panel.active { display: flex; flex-direction: column; }
     .panel-title { font-size: 22px; font-weight: bold; color: #3b82f6; margin-bottom: 20px; }
 
-    /* FORM ÖĞELERİ VE KARTLAR */
     .settings-card { background: #151921; border: 1px solid #1e2430; border-radius: 12px; padding: 16px; margin-bottom: 16px; transition: 0.2s; }
     .settings-card:hover { border-color: #3b82f6; }
     .settings-header { display: flex; align-items: center; justify-content: space-between; font-weight: bold; cursor: pointer; }
     .sound-select-box { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #1e2430; }
     
-    /* ÖZEL TOGGLE */
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
@@ -64,8 +59,8 @@
     .btn-danger { padding: 6px 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; }
     .btn-danger:hover { background: #ef4444; color: white; }
 
-    /* 2. ANA SOHBET ALANI */
-    .main-chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0e14; }
+    /* ANA SOHBET ALANI */
+    .main-chat-area { flex: 1; display: flex; flex-direction: column; background: #0b0e14; position: relative; }
     .chat-header { height: 70px; border-bottom: 1px solid #1e2430; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; background: #151921; }
     .header-user-info { display: flex; align-items: center; gap: 12px; }
     
@@ -100,11 +95,9 @@
     .input-wrapper { flex: 1; background: #0b0e14; border: 1px solid #1e2430; border-radius: 24px; padding: 8px 16px; display: flex; align-items: center; gap: 12px; }
     .input-wrapper input { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 14px; }
     .input-wrapper i { color: #64748b; cursor: pointer; font-size: 18px; }
-    .input-wrapper i:hover { color: #fff; }
     .send-btn { width: 40px; height: 40px; background: #2563eb; border: none; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-    .send-btn:hover { background: #1d4ed8; }
 
-    /* 3. SAĞ PANEL */
+    /* SAĞ PANEL */
     .right-sidebar { width: 320px; background: #151921; border-left: 1px solid #1e2430; display: flex; flex-direction: column; }
     .profile-card-large { text-align: center; border-bottom: 1px solid #1e2430; padding: 20px; }
     .profile-avatar-large { width: 70px; height: 70px; border-radius: 50%; background: #2563eb; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
@@ -118,7 +111,6 @@
     
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #1a202c; transition: 0.2s; position: relative; }
     .chat-item:hover, .chat-item.active { background: #1e2430; }
-    
     .chat-item-avatar { width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 14px; }
     
     .status-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #151921; }
@@ -133,11 +125,27 @@
     .generic-list-item-left { display: flex; align-items: center; gap: 16px; }
     .generic-list-item i { font-size: 24px; color: #3b82f6; }
 
-    /* ARAMA MODALI */
+    /* YUKARIDA ÇIKAN ARAMA BİLDİRİMİ / EKRANI */
+    #top-call-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #1e293b; border: 1px solid #3b82f6; border-radius: 12px; padding: 12px 20px; display: none; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px rgba(0,0,0,0.6); z-index: 1000; animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from { top: -60px; opacity: 0; } to { top: 15px; opacity: 1; } }
+
+    .call-bar-info { display: flex; align-items: center; gap: 12px; }
+    .call-bar-avatar { width: 40px; height: 40px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .call-bar-actions { display: flex; gap: 10px; }
+    .call-bar-btn { border: none; width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+    .call-bar-btn.accept { background: #22c55e; }
+    .call-bar-btn.decline { background: #ef4444; }
+
+    /* ARAMA MODALI VE ÇİFT VİDEO BÖLÜMÜ */
     #call-modal { position: fixed; inset: 0; background: rgba(11, 14, 20, 0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-    .call-box { background: #151921; border: 1px solid #1e2430; border-radius: 16px; padding: 30px; width: 500px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+    .call-box { background: #151921; border: 1px solid #1e2430; border-radius: 16px; padding: 24px; width: 600px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
     .call-box h3 { margin-bottom: 15px; color: #3b82f6; font-size: 20px; }
-    #video-preview { width: 100%; height: 280px; background: #000; border-radius: 10px; object-fit: cover; margin-bottom: 20px; transform: scaleX(-1); }
+    
+    .video-grid { display: flex; gap: 12px; margin-bottom: 20px; justify-content: center; }
+    .video-wrapper { position: relative; width: 48%; height: 220px; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #232936; }
+    .video-wrapper video { width: 100%; height: 100%; object-fit: cover; }
+    .video-label { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #fff; }
+
     .call-controls { display: flex; justify-content: center; gap: 15px; }
     .call-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
     .call-btn.end { background: #ef4444; color: white; }
@@ -161,8 +169,22 @@
   <div id="call-modal">
     <div class="call-box">
       <h3 id="call-title">Canlı Görüşme</h3>
-      <video id="video-preview" autoplay playsinline muted></video>
+      
+      <div class="video-grid">
+        <!-- Karşı Tarafın Görüntüsü -->
+        <div class="video-wrapper">
+          <video id="remote-video" autoplay playsinline></video>
+          <div class="video-label" id="remote-label">Karşı Taraf</div>
+        </div>
+        <!-- Kendi Görüntün -->
+        <div class="video-wrapper">
+          <video id="local-video" autoplay playsinline muted style="transform: scaleX(-1);"></video>
+          <div class="video-label">Sen</div>
+        </div>
+      </div>
+
       <div id="audio-visualizer-text" style="color: #22c55e; margin-bottom: 20px; font-weight: 500; display: none;">🎤 Mikrofon aktif, ses iletiliyor...</div>
+      
       <div class="call-controls">
         <button class="call-btn end" onclick="endCall()"><i class="fa-solid fa-phone-slash"></i> Aramayı Sonlandır</button>
       </div>
@@ -172,7 +194,7 @@
   <!-- UYGULAMA ANA ALANI -->
   <div id="app-container">
     
-    <!-- 1. SOL NAVİGASYON -->
+    <!-- SOL NAVİGASYON -->
     <nav class="nav-sidebar">
       <div>
         <div class="logo-icon">M</div>
@@ -190,8 +212,24 @@
       </button>
     </nav>
 
-    <!-- 2. SOHBET ALANI -->
+    <!-- ANA SOHBET ALANI -->
     <main class="main-chat-area" id="panel-chat">
+      
+      <!-- ÜSTTE ÇIKAN ARAMA BİLDİRİM / KONTROL BARI -->
+      <div id="top-call-bar">
+        <div class="call-bar-info">
+          <div class="call-bar-avatar" id="call-bar-avatar">E</div>
+          <div>
+            <div style="font-weight: 600; font-size: 14px;" id="call-bar-name">Kullanıcı</div>
+            <div style="font-size: 11px; color: #22c55e;" id="call-bar-status">Aranıyor...</div>
+          </div>
+        </div>
+        <div class="call-bar-actions">
+          <button class="call-bar-btn accept" id="call-accept-btn" onclick="acceptIncomingCall()"><i class="fa-solid fa-phone"></i></button>
+          <button class="call-bar-btn decline" onclick="endCall()"><i class="fa-solid fa-phone-slash"></i></button>
+        </div>
+      </div>
+
       <div class="chat-header">
         <div class="header-user-info">
           <div class="chat-item-avatar" id="chat-header-avatar">E</div>
@@ -202,11 +240,11 @@
         </div>
 
         <div class="chat-header-actions">
-          <button id="audioCallBtn" title="Canlı Sesli Görüşme">
+          <button id="audioCallBtn" onclick="initiateCall(false)" title="Canlı Sesli Görüşme">
             <i class="fa-solid fa-phone"></i>
           </button>
           
-          <button id="videoCallBtn" title="Canlı Görüntülü Görüşme">
+          <button id="videoCallBtn" onclick="initiateCall(true)" title="Canlı Görüntülü Görüşme">
             <i class="fa-solid fa-video"></i>
           </button>
           
@@ -261,7 +299,6 @@
     <section class="content-panel" id="panel-settings">
       <div class="panel-title">Ayarlar</div>
 
-      <!-- BİLDİRİM SESLERİ KARTI -->
       <div class="settings-card" style="cursor:default;">
         <div class="settings-header">
           <span><i class="fa-solid fa-bell" style="margin-right:8px; color:#3b82f6;"></i> Bildirim Sesleri</span>
@@ -284,11 +321,6 @@
               <option value="soft">Soft / Rahatlatıcı (Melodi)</option>
               <option value="echo">Yankılı Uyarı</option>
               <option value="chirp">Kuş Esintisi</option>
-              <option value="crystal">Kristal Tını</option>
-              <option value="cosmic">Kozmik Dalga</option>
-              <option value="radar">Radyo Bip</option>
-              <option value="breeze">Zarif Esinti</option>
-              <option value="office">Klasik / Ofis</option>
             </select>
           </div>
 
@@ -307,9 +339,7 @@
       <!-- ENGELLENENLER BÖLÜMÜ -->
       <div class="settings-card" style="cursor:default;">
         <div style="font-weight:bold; margin-bottom:12px; color:#ef4444;"><i class="fa-solid fa-user-slash" style="margin-right:8px;"></i> Engellenen Kullanıcılar</div>
-        <div id="blocked-users-list">
-          <!-- Dinamik olarak dolacak -->
-        </div>
+        <div id="blocked-users-list"></div>
       </div>
 
       <!-- İSİM DEĞİŞTİRME -->
@@ -336,7 +366,7 @@
         <button class="btn-primary" onclick="changeMyPassword()">Şifreyi Güncelle</button>
       </div>
 
-      <!-- ADMIN ŞİFRE SIFIRLAMA PANELİ -->
+      <!-- ADMIN PANEL -->
       <div class="settings-card" id="admin-password-reset-card" style="cursor:default; display:none; border-color: #ef4444;">
         <div style="font-weight:bold; margin-bottom:12px; color: #ef4444;"><i class="fa-solid fa-user-shield" style="margin-right:8px;"></i> Admin Panel: Kullanıcı Şifre Sıfırlama</div>
         <div class="form-group">
@@ -352,7 +382,7 @@
 
     </section>
 
-    <!-- 3. SAĞ PANEL -->
+    <!-- SAĞ PANEL -->
     <aside class="right-sidebar">
       <div class="profile-card-large">
         <div class="profile-avatar-large" id="profile-avatar-big">?</div>
@@ -380,55 +410,38 @@
       "admin": "ozelsifre"
     };
 
-    function getUsers() {
-      return JSON.parse(localStorage.getItem('app_users')) || DEFAULT_USERS;
-    }
+    let socket = null;
+    let peerConnection = null;
+    let localStream = null;
+    let ringtoneInterval = null;
+    let incomingSignalData = null;
+    let currentCallTarget = null;
+    let isVideoCall = false;
 
-    function saveUsers(users) {
-      localStorage.setItem('app_users', JSON.stringify(users));
-    }
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    function getDisplayNames() {
-      return JSON.parse(localStorage.getItem('app_display_names')) || {};
-    }
+    function getUsers() { return JSON.parse(localStorage.getItem('app_users')) || DEFAULT_USERS; }
+    function saveUsers(users) { localStorage.setItem('app_users', JSON.stringify(users)); }
+    function getDisplayNames() { return JSON.parse(localStorage.getItem('app_display_names')) || {}; }
+    function saveDisplayNames(names) { localStorage.setItem('app_display_names', JSON.stringify(names)); }
+    function getDisplayNameFor(username) { return getDisplayNames()[username] || username; }
 
-    function saveDisplayNames(names) {
-      localStorage.setItem('app_display_names', JSON.stringify(names));
-    }
-
-    function getDisplayNameFor(username) {
-      const names = getDisplayNames();
-      return names[username] ? names[username] : username;
-    }
-
-    /* ENGELLENENLER YÖNETİMİ */
     function getBlockedUsers() {
       const blocked = JSON.parse(localStorage.getItem('app_blocked_users')) || {};
       return blocked[currentUser] || [];
     }
-
     function saveBlockedUsers(list) {
       const blocked = JSON.parse(localStorage.getItem('app_blocked_users')) || {};
       blocked[currentUser] = list;
       localStorage.setItem('app_blocked_users', JSON.stringify(blocked));
     }
-
-    function isBlocked(username) {
-      return getBlockedUsers().includes(username);
-    }
+    function isBlocked(username) { return getBlockedUsers().includes(username); }
 
     function blockCurrentTarget() {
-      if (activeTarget === 'genel') {
-        alert("Genel sohbet kanalı engellenemez!");
-        return;
-      }
-      if (confirm(`${getDisplayNameFor(activeTarget).toUpperCase()} kullanıcısını engellemek istediğinize emin misiniz?`)) {
+      if (activeTarget === 'genel') { alert("Genel sohbet kanalı engellenemez!"); return; }
+      if (confirm(`${getDisplayNameFor(activeTarget).toUpperCase()} engellensin mi?`)) {
         let blockedList = getBlockedUsers();
-        if (!blockedList.includes(activeTarget)) {
-          blockedList.push(activeTarget);
-          saveBlockedUsers(blockedList);
-        }
-        alert("Kullanıcı engellendi ve listelerinizden kaldırıldı.");
+        if (!blockedList.includes(activeTarget)) { blockedList.push(activeTarget); saveBlockedUsers(blockedList); }
         selectChat('genel');
         renderUserList();
         renderContactsPanel();
@@ -436,45 +449,33 @@
     }
 
     function unblockUser(username) {
-      let blockedList = getBlockedUsers();
-      blockedList = blockedList.filter(u => u !== username);
+      let blockedList = getBlockedUsers().filter(u => u !== username);
       saveBlockedUsers(blockedList);
       renderBlockedUsersList();
       renderUserList();
       renderContactsPanel();
-      alert(`${getDisplayNameFor(username).toUpperCase()} kişisinin engeli kaldırıldı.`);
     }
 
     function renderBlockedUsersList() {
       const container = document.getElementById('blocked-users-list');
       const blockedList = getBlockedUsers();
-
-      if (blockedList.length === 0) {
-        container.innerHTML = `<div style="font-size: 12px; color: #64748b;">Henüz engellenmiş bir kullanıcı yok.</div>`;
-        return;
-      }
-
+      if (blockedList.length === 0) { container.innerHTML = `<div style="font-size: 12px; color: #64748b;">Henüz engellenmiş biri yok.</div>`; return; }
       let html = '';
       blockedList.forEach(user => {
-        let displayName = getDisplayNameFor(user);
         html += `
           <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e2430;">
-            <span style="font-size: 13px; font-weight: bold;">${displayName.toUpperCase()} (@${user})</span>
+            <span style="font-size: 13px; font-weight: bold;">${getDisplayNameFor(user).toUpperCase()} (@${user})</span>
             <button class="btn-primary" style="padding: 4px 8px; font-size: 11px; background: #22c55e;" onclick="unblockUser('${user}')">Engeli Kaldır</button>
-          </div>
-        `;
+          </div>`;
       });
       container.innerHTML = html;
     }
 
-    if (!localStorage.getItem('app_users')) {
-      saveUsers(DEFAULT_USERS);
-    }
+    if (!localStorage.getItem('app_users')) saveUsers(DEFAULT_USERS);
 
     let currentUser = "";
     let activeTarget = "genel";
     let unreadCounts = {};
-    let localStream = null;
     let customAudioData = null;
     let isSoundEnabled = true;
 
@@ -494,18 +495,239 @@
     }
 
     function logout() {
+      if (socket) socket.disconnect();
       currentUser = "";
       document.getElementById('app-container').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
     }
 
     function initApp() {
+      setupSocketConnection();
       updateHeartbeat();
       setInterval(updateHeartbeat, 3000);
       setInterval(pollData, 1500);
       updateHeaderAndProfile();
       renderUserList();
       selectChat('genel');
+    }
+
+    /* SOCKET VE CANLI ARAMA SİNYALLEŞME SİSTEMİ */
+    function setupSocketConnection() {
+      // Kamu/açık socket sinyal sunucusu bağlantısı
+      socket = io("https://0.peerjs.com", { autoConnect: false }); 
+      
+      // LocalStorage / Event tabanlı sinyalleşme yedekleme mekanizması
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'rtc_signal_call_' + currentUser && e.newValue) {
+          const signal = JSON.parse(e.newValue);
+          handleIncomingSignal(signal);
+        }
+      });
+    }
+
+    function sendSignal(target, signalData) {
+      localStorage.setItem('rtc_signal_call_' + target, JSON.stringify({
+        from: currentUser,
+        data: signalData
+      }));
+    }
+
+    /* TELEFON ÇALMA SESİ EFEKTİ */
+    function startRingtone() {
+      stopRingtone();
+      playRingtoneBeep();
+      ringtoneInterval = setInterval(playRingtoneBeep, 2500);
+    }
+
+    function stopRingtone() {
+      if (ringtoneInterval) {
+        clearInterval(ringtoneInterval);
+        ringtoneInterval = null;
+      }
+    }
+
+    function playRingtoneBeep() {
+      if (!isSoundEnabled) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(425, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      
+      osc.start();
+      osc.stop(ctx.currentTime + 1.2);
+    }
+
+    /* ARAMA BAŞLATMA VE YÖNETİMİ */
+    async function initiateCall(video) {
+      if (activeTarget === 'genel') {
+        alert("Genel kanalda birebir arama yapılamaz!");
+        return;
+      }
+
+      currentCallTarget = activeTarget;
+      isVideoCall = video;
+
+      showTopCallBar(getDisplayNameFor(activeTarget), "Aranıyor...", false);
+      startRingtone();
+
+      // Kamera / Mikrofon alımı
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideoCall });
+        document.getElementById('local-video').srcObject = localStream;
+      } catch(err) {
+        alert("Kamera/Mikrofon erişimi engellendi!");
+        endCall();
+        return;
+      }
+
+      // RTCPeerConnection Başlat
+      peerConnection = new RTCPeerConnection(rtcConfig);
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+      peerConnection.ontrack = (event) => {
+        document.getElementById('remote-video').srcObject = event.streams[0];
+      };
+
+      peerConnection.onicecandidate = (e) => {
+        if (e.candidate) {
+          sendSignal(currentCallTarget, { type: 'candidate', candidate: e.candidate });
+        }
+      };
+
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      sendSignal(currentCallTarget, {
+        type: 'offer',
+        offer: offer,
+        isVideo: isVideoCall
+      });
+    }
+
+    /* GELEN SİNYALİ İŞLEME */
+    async function handleIncomingSignal(signal) {
+      if (isBlocked(signal.from)) return;
+
+      if (signal.data.type === 'offer') {
+        currentCallTarget = signal.from;
+        isVideoCall = signal.data.isVideo;
+        incomingSignalData = signal.data.offer;
+
+        showTopCallBar(getDisplayNameFor(signal.from), "Gelen Arama...", true);
+        startRingtone();
+      } 
+      else if (signal.data.type === 'answer' && peerConnection) {
+        stopRingtone();
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(signal.data.answer));
+        openCallModal();
+      } 
+      else if (signal.data.type === 'candidate' && peerConnection) {
+        try {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(signal.data.candidate));
+        } catch(e) {}
+      }
+      else if (signal.data.type === 'end') {
+        cleanCallState();
+      }
+    }
+
+    async function acceptIncomingCall() {
+      stopRingtone();
+      hideTopCallBar();
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideoCall });
+        document.getElementById('local-video').srcObject = localStream;
+      } catch(err) {
+        alert("Medya cihazlarına erişilemedi.");
+        endCall();
+        return;
+      }
+
+      peerConnection = new RTCPeerConnection(rtcConfig);
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+      peerConnection.ontrack = (event) => {
+        document.getElementById('remote-video').srcObject = event.streams[0];
+      };
+
+      peerConnection.onicecandidate = (e) => {
+        if (e.candidate) {
+          sendSignal(currentCallTarget, { type: 'candidate', candidate: e.candidate });
+        }
+      };
+
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingSignalData));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+
+      sendSignal(currentCallTarget, { type: 'answer', answer: answer });
+      openCallModal();
+    }
+
+    function openCallModal() {
+      document.getElementById('call-modal').style.display = 'flex';
+      document.getElementById('call-title').textContent = isVideoCall ? "Görüntülü Görüşme" : "Sesli Görüşme";
+      
+      const remoteVideoBox = document.getElementById('remote-video').parentElement;
+      const localVideoBox = document.getElementById('local-video').parentElement;
+
+      if (!isVideoCall) {
+        remoteVideoBox.style.display = 'none';
+        localVideoBox.style.display = 'none';
+        document.getElementById('audio-visualizer-text').style.display = 'block';
+      } else {
+        remoteVideoBox.style.display = 'block';
+        localVideoBox.style.display = 'block';
+        document.getElementById('audio-visualizer-text').style.display = 'none';
+      }
+      document.getElementById('remote-label').textContent = getDisplayNameFor(currentCallTarget);
+    }
+
+    function showTopCallBar(name, statusText, isIncoming) {
+      const bar = document.getElementById('top-call-bar');
+      document.getElementById('call-bar-name').textContent = name.toUpperCase();
+      document.getElementById('call-bar-status').textContent = statusText;
+      document.getElementById('call-bar-avatar').textContent = name.charAt(0).toUpperCase();
+      
+      const acceptBtn = document.getElementById('call-accept-btn');
+      acceptBtn.style.display = isIncoming ? 'flex' : 'none';
+
+      bar.style.display = 'flex';
+    }
+
+    function hideTopCallBar() {
+      document.getElementById('top-call-bar').style.display = 'none';
+    }
+
+    function endCall() {
+      if (currentCallTarget) {
+        sendSignal(currentCallTarget, { type: 'end' });
+      }
+      cleanCallState();
+    }
+
+    function cleanCallState() {
+      stopRingtone();
+      hideTopCallBar();
+      document.getElementById('call-modal').style.display = 'none';
+
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      document.getElementById('local-video').srcObject = null;
+      document.getElementById('remote-video').srcObject = null;
+      currentCallTarget = null;
     }
 
     function updateHeaderAndProfile() {
@@ -540,12 +762,7 @@
     function prepareSettingsPanel() {
       document.getElementById('setting-display-name').value = getDisplayNameFor(currentUser);
       renderBlockedUsersList();
-      
-      if (currentUser === "admin") {
-        document.getElementById('admin-password-reset-card').style.display = 'block';
-      } else {
-        document.getElementById('admin-password-reset-card').style.display = 'none';
-      }
+      document.getElementById('admin-password-reset-card').style.display = (currentUser === "admin") ? 'block' : 'none';
     }
 
     function toggleSoundSelect() {
@@ -564,9 +781,8 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           customAudioData = e.target.result;
-          const infoBox = document.getElementById('custom-sound-info');
-          infoBox.style.display = 'block';
-          infoBox.textContent = `✓ "${file.name}" yüklendi ve varsayılan ses olarak ayarlandı.`;
+          document.getElementById('custom-sound-info').style.display = 'block';
+          document.getElementById('custom-sound-info').textContent = `✓ "${file.name}" yüklendi.`;
           playSelectedSound();
         };
         reader.readAsDataURL(file);
@@ -575,12 +791,7 @@
 
     function playSelectedSound() {
       if (!isSoundEnabled) return;
-
-      if (customAudioData) {
-        const audio = new Audio(customAudioData);
-        audio.play().catch(e => console.log(e));
-        return;
-      }
+      if (customAudioData) { new Audio(customAudioData).play().catch(e => {}); return; }
 
       const style = document.getElementById('notification-sound-select').value;
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -589,28 +800,12 @@
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      let freq = 440;
-      let duration = 0.2;
-
-      switch(style) {
-        case 'cyber': freq = 880; osc.type = 'sawtooth'; duration = 0.15; break;
-        case 'arcade': freq = 600; osc.type = 'square'; duration = 0.1; break;
-        case 'soft': freq = 320; osc.type = 'sine'; duration = 0.4; break;
-        case 'echo': freq = 520; osc.type = 'triangle'; duration = 0.3; break;
-        case 'chirp': freq = 1200; osc.type = 'sine'; duration = 0.08; break;
-        case 'crystal': freq = 950; osc.type = 'sine'; duration = 0.25; break;
-        case 'cosmic': freq = 220; osc.type = 'sawtooth'; duration = 0.5; break;
-        case 'radar': freq = 750; osc.type = 'square'; duration = 0.2; break;
-        case 'breeze': freq = 400; osc.type = 'triangle'; duration = 0.35; break;
-        case 'office': freq = 500; osc.type = 'sine'; duration = 0.2; break;
-      }
-
+      let freq = style === 'cyber' ? 880 : style === 'arcade' ? 600 : style === 'soft' ? 320 : 520;
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
       osc.start();
-      osc.stop(ctx.currentTime + duration);
+      osc.stop(ctx.currentTime + 0.2);
     }
 
     function updateDisplayName() {
@@ -630,20 +825,12 @@
       const newPass = document.getElementById('setting-new-pass').value.trim();
       const users = getUsers();
 
-      if (!users[currentUser] || users[currentUser] !== oldPass) {
-        alert("Mevcut şifreniz hatalı!");
-        return;
-      }
-      if (!newPass) {
-        alert("Lütfen yeni bir şifre girin!");
-        return;
-      }
+      if (!users[currentUser] || users[currentUser] !== oldPass) { alert("Mevcut şifreniz hatalı!"); return; }
+      if (!newPass) { alert("Lütfen yeni bir şifre girin!"); return; }
 
       users[currentUser] = newPass;
       saveUsers(users);
-      document.getElementById('setting-old-pass').value = '';
-      document.getElementById('setting-new-pass').value = '';
-      alert("Şifreniz başarıyla değiştirildi!");
+      alert("Şifreniz güncellendi!");
     }
 
     function adminResetPassword() {
@@ -651,19 +838,9 @@
       const targetNewPass = document.getElementById('admin-target-new-pass').value.trim();
       const users = getUsers();
 
-      if (!users[targetUser]) {
-        alert("Böyle bir kullanıcı bulunamadı!");
-        return;
-      }
-      if (!targetNewPass) {
-        alert("Lütfen geçerli yeni bir şifre yazın!");
-        return;
-      }
-
+      if (!users[targetUser]) { alert("Kullanıcı bulunamadı!"); return; }
       users[targetUser] = targetNewPass;
       saveUsers(users);
-      document.getElementById('admin-target-user').value = '';
-      document.getElementById('admin-target-new-pass').value = '';
       alert(`'${targetUser}' kullanıcısının şifresi başarıyla sıfırlandı!`);
     }
 
@@ -686,7 +863,6 @@
 
     function selectChat(target) {
       activeTarget = target;
-      if (unreadCounts[activeTarget]) unreadCounts[activeTarget] = 0;
       renderUserList();
 
       let headerName = target === 'genel' ? "E-Ticaret Sohbeti" : getDisplayNameFor(target).toUpperCase();
@@ -703,20 +879,12 @@
     function renderUserList() {
       const listContainer = document.getElementById('users-list');
       const users = getUsers();
-      let html = '';
-
-      html += `
-        <div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
-          <div class="chat-item-avatar">E<div class="status-dot online"></div></div>
-          <div class="chat-item-info">
-            <div class="chat-item-name">E-Ticaret Sohbeti</div>
-            <div class="chat-item-lastmsg">Genel kanal</div>
-          </div>
-        </div>
-      `;
+      let html = `<div class="chat-item ${activeTarget === 'genel' ? 'active' : ''}" onclick="selectChat('genel')">
+        <div class="chat-item-avatar">E<div class="status-dot online"></div></div>
+        <div class="chat-item-info"><div class="chat-item-name">E-Ticaret Sohbeti</div><div class="chat-item-lastmsg">Genel kanal</div></div>
+      </div>`;
 
       Object.keys(users).forEach(user => {
-        // KULLANICI ENGELLİYSE SOHBET LİSTESİNDE GÖSTERME
         if (user !== currentUser && !isBlocked(user)) {
           let online = isUserOnline(user);
           let displayName = getDisplayNameFor(user);
@@ -727,8 +895,7 @@
                 <div class="chat-item-name">${displayName.toUpperCase()}</div>
                 <div class="chat-item-lastmsg">${online ? 'Çevrim içi' : 'Çevrim dışı'}</div>
               </div>
-            </div>
-          `;
+            </div>`;
         }
       });
       listContainer.innerHTML = html;
@@ -766,8 +933,7 @@
               <div class="bubble">${escapeHtml(msg.text)}</div>
             </div>
             <div class="time-stamp">${msg.time}</div>
-          </div>
-        `;
+          </div>`;
       });
       container.innerHTML = html;
       container.scrollTop = container.scrollHeight;
@@ -791,14 +957,13 @@
             <div><div style="font-weight: bold;">${g}</div></div>
           </div>
           <button class="btn-primary" style="padding: 4px 8px; font-size: 11px;" onclick="renameGroup(${index})">Yeniden Adlandır</button>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
 
     function renameGroup(index) {
       let groups = JSON.parse(localStorage.getItem('app_custom_groups') || '[]');
-      const newName = prompt("Grup için yeni bir ad girin:", groups[index]);
-      if (newName && newName.trim() !== "") {
+      const newName = prompt("Grup yeni adı:", groups[index]);
+      if (newName && newName.trim()) {
         groups[index] = newName.trim();
         localStorage.setItem('app_custom_groups', JSON.stringify(groups));
         renderCustomGroups();
@@ -807,9 +972,8 @@
 
     function renameContact(username) {
       let names = getDisplayNames();
-      const currentName = getDisplayNameFor(username);
-      const newName = prompt(`'${username}' için yeni bir özel ad yazın:`, currentName);
-      if (newName && newName.trim() !== "") {
+      const newName = prompt(`'${username}' için özel isim:`, getDisplayNameFor(username));
+      if (newName && newName.trim()) {
         names[username] = newName.trim();
         saveDisplayNames(names);
         renderContactsPanel();
@@ -832,7 +996,6 @@
       const users = getUsers();
       let html = '';
       Object.keys(users).forEach(user => {
-        // KULLANICI ENGELLİYSE KİŞİLER LİSTESİNDE GÖSTERME
         if (user !== currentUser && !isBlocked(user)) {
           let online = isUserOnline(user);
           let displayName = getDisplayNameFor(user);
@@ -846,55 +1009,10 @@
                 </div>
               </div>
               <button class="btn-primary" style="padding: 4px 8px; font-size: 11px;" onclick="renameContact('${user}')">Adı Değiştir</button>
-            </div>
-          `;
+            </div>`;
         }
       });
       document.getElementById('contacts-list-container').innerHTML = html;
-    }
-
-    /* ARAMA VE MENÜ İŞLEVLERİ */
-    const callModal = document.getElementById('call-modal');
-    const videoPreview = document.getElementById('video-preview');
-    const callTitle = document.getElementById('call-title');
-    const audioVisualizerText = document.getElementById('audio-visualizer-text');
-
-    document.getElementById('audioCallBtn').addEventListener('click', async () => {
-      callTitle.textContent = "Canlı Sesli Görüşme";
-      videoPreview.style.display = 'none';
-      audioVisualizerText.style.display = 'block';
-      callModal.style.display = 'flex';
-
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      } catch (err) {
-        alert("Mikrofon izni alınamadı!");
-        endCall();
-      }
-    });
-
-    document.getElementById('videoCallBtn').addEventListener('click', async () => {
-      callTitle.textContent = "Canlı Görüntülü Görüşme";
-      videoPreview.style.display = 'block';
-      audioVisualizerText.style.display = 'none';
-      callModal.style.display = 'flex';
-
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-        videoPreview.srcObject = localStream;
-      } catch (err) {
-        alert("Kamera/Mikrofon izni alınamadı!");
-        endCall();
-      }
-    });
-
-    function endCall() {
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
-      }
-      videoPreview.srcObject = null;
-      callModal.style.display = 'none';
     }
 
     const menuToggleBtn = document.getElementById('menuToggleBtn');
@@ -912,9 +1030,7 @@
     document.getElementById('renameBtn').addEventListener('click', () => {
       const headerNameElem = document.getElementById('chat-header-name');
       const newName = prompt("Bu sohbet için yeni bir isim girin:", headerNameElem.innerText);
-      if (newName && newName.trim() !== "") {
-        headerNameElem.innerText = newName.trim();
-      }
+      if (newName && newName.trim()) headerNameElem.innerText = newName.trim();
     });
 
     document.getElementById('deleteChatBtn').addEventListener('click', () => {
@@ -924,6 +1040,5 @@
       }
     });
   </script>
-
 </body>
 </html>
