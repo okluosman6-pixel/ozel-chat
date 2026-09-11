@@ -148,7 +148,7 @@
   <div id="login-screen">
     <div class="login-box">
       <h2>Özel Sohbet Girişi</h2>
-      <input type="text" id="username-input" placeholder="Kullanıcı Adı (örn: baris)" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
+      <input type="text" id="username-input" placeholder="Kullanıcı Adı (örn: baris alp)" onkeydown="if(event.key==='Enter') document.getElementById('password-input').focus()">
       <input type="password" id="password-input" placeholder="Şifre" onkeydown="if(event.key==='Enter') login()">
       <button onclick="login()">Giriş Yap</button>
       <p id="error-msg">Hatalı kullanıcı adı veya şifre!</p>
@@ -365,6 +365,20 @@
       localStorage.setItem('app_users', JSON.stringify(users));
     }
 
+    function getDisplayNames() {
+      return JSON.parse(localStorage.getItem('app_display_names')) || {};
+    }
+
+    function saveDisplayNames(names) {
+      localStorage.setItem('app_display_names', JSON.stringify(names));
+    }
+
+    function getDisplayNameFor(username) {
+      const names = getDisplayNames();
+      if (names[username]) return names[username];
+      return username;
+    }
+
     if (!localStorage.getItem('app_users')) {
       saveUsers(DEFAULT_USERS);
     }
@@ -458,7 +472,7 @@
     }
 
     function prepareSettingsPanel() {
-      document.getElementById('setting-display-name').value = currentUser.toUpperCase();
+      document.getElementById('setting-display-name').value = getDisplayNameFor(currentUser);
       document.getElementById('sound-toggle-switch').checked = soundEnabled;
       
       if (customAudioDataUrl) {
@@ -475,7 +489,7 @@
         select.innerHTML = '';
         Object.keys(users).forEach(u => {
           if (u !== 'admin') {
-            select.innerHTML += `<option value="${u}">${u.toUpperCase()}</option>`;
+            select.innerHTML += `<option value="${u}">${getDisplayNameFor(u).toUpperCase()}</option>`;
           }
         });
       } else {
@@ -492,11 +506,12 @@
       }
       let html = '';
       trash.forEach((item, index) => {
-        let roomLabel = item.chatRoom === 'genel' ? 'E-Ticaret Sohbeti' : `${item.chatRoom.toUpperCase()} ile Özel`;
+        let senderDisplayName = getDisplayNameFor(item.sender);
+        let roomLabel = item.chatRoom === 'genel' ? 'E-Ticaret Sohbeti' : `${getDisplayNameFor(item.chatRoom).toUpperCase()} ile Özel`;
         html += `
           <div style="background: #0b0e14; border: 1px solid #1e2430; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <div style="font-size: 11px; color: #3b82f6; font-weight: bold; margin-bottom: 2px;">📁 ${roomLabel} (${item.sender.toUpperCase()})</div>
+              <div style="font-size: 11px; color: #3b82f6; font-weight: bold; margin-bottom: 2px;">📁 ${roomLabel} (${senderDisplayName.toUpperCase()})</div>
               <div style="font-size: 13px; color: #e1e7ed;">${escapeHtml(item.text)}</div>
             </div>
             <button onclick="restoreMessage(${index})" class="btn-primary" style="font-size: 11px; padding: 4px 8px;"><i class="fa-solid fa-rotate-left"></i></button>
@@ -548,8 +563,15 @@
     }
 
     function updateDisplayName() {
-      const name = document.getElementById('setting-display-name').value.trim();
-      if (name) alert("Adınız güncellendi!");
+      const newName = document.getElementById('setting-display-name').value.trim();
+      if (newName) {
+        let names = getDisplayNames();
+        names[currentUser] = newName;
+        saveDisplayNames(names);
+        updateHeaderAndProfile();
+        renderUserList();
+        alert("Görünen adınız güncellendi!");
+      }
     }
 
     function updatePassword() {
@@ -570,7 +592,7 @@
         let users = getUsers();
         users[targetUser] = newPass;
         saveUsers(users);
-        alert(`${targetUser.toUpperCase()} şifresi sıfırlandı!`);
+        alert(`${getDisplayNameFor(targetUser).toUpperCase()} şifresi sıfırlandı!`);
       }
     }
 
@@ -604,11 +626,12 @@
       Object.keys(users).forEach(user => {
         if (user !== currentUser) {
           let online = isUserOnline(user);
+          let displayName = getDisplayNameFor(user);
           html += `
             <div class="generic-list-item" onclick="switchTab('chat'); selectChat('${user}');" style="cursor:pointer;">
               <i class="fa-solid fa-circle-user"></i>
               <div style="flex:1;">
-                <div style="font-weight: bold;">${user.toUpperCase()}</div>
+                <div style="font-weight: bold;">${displayName.toUpperCase()}</div>
                 <div style="font-size: 12px; color: ${online ? '#22c55e' : '#64748b'}">${online ? '● Çevrim İçi' : '● Çevrim Dışı'}</div>
               </div>
             </div>
@@ -641,8 +664,9 @@
 
     function showNotification(sender, text) {
       toastSenderTarget = sender;
-      document.getElementById('toast-avatar').textContent = sender.charAt(0).toUpperCase();
-      document.getElementById('toast-title').textContent = sender.toUpperCase() + " yeni mesaj gönderdi";
+      let senderDisplayName = getDisplayNameFor(sender);
+      document.getElementById('toast-avatar').textContent = senderDisplayName.charAt(0).toUpperCase();
+      document.getElementById('toast-title').textContent = senderDisplayName.toUpperCase() + " yeni mesaj gönderdi";
       document.getElementById('toast-body').textContent = text;
       document.getElementById('notification-toast').style.display = 'flex';
       playNotificationSound();
@@ -709,23 +733,26 @@
       const profileUsername = document.getElementById('profile-username-val');
       const profileStatus = document.getElementById('profile-status-text');
 
+      let currentDisplayName = getDisplayNameFor(currentUser);
+
       if (activeTarget === 'genel') {
         headerAvatar.textContent = 'E';
         headerName.textContent = 'E-Ticaret Sohbeti';
         headerStatus.innerHTML = `<span style="color: #22c55e;">● ${getOnlineUserCount()} Aktif</span>`;
-        profileAvatar.textContent = currentUser.charAt(0).toUpperCase();
-        profileName.textContent = currentUser.toUpperCase();
+        profileAvatar.textContent = currentDisplayName.charAt(0).toUpperCase();
+        profileName.textContent = currentDisplayName.toUpperCase();
         profileUsername.textContent = '@' + currentUser;
         profileStatus.innerHTML = `<span style="color: #22c55e;">● Çevrim İçi</span>`;
       } else {
         const online = isUserOnline(activeTarget);
-        headerAvatar.textContent = activeTarget.charAt(0).toUpperCase();
-        headerName.textContent = activeTarget.toUpperCase() + ' ile Sohbet';
+        let targetDisplayName = getDisplayNameFor(activeTarget);
+        headerAvatar.textContent = targetDisplayName.charAt(0).toUpperCase();
+        headerName.textContent = targetDisplayName.toUpperCase() + ' ile Sohbet';
         headerStatus.innerHTML = online ? `<span style="color: #22c55e;">● Çevrim İçi</span>` : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
-        profileAvatar.textContent = activeTarget.charAt(0).toUpperCase();
-        profileName.textContent = activeTarget.toUpperCase();
-        profileUsername.textContent = '@' + activeTarget;
-        profileStatus.innerHTML = online ? `<span style="color: #22c55e;">● Çevrim İçi</span>` : `<span style="color: #64748b;">● Çevrim Dışı</span>`;
+        profileAvatar.textContent = currentDisplayName.charAt(0).toUpperCase();
+        profileName.textContent = currentDisplayName.toUpperCase();
+        profileUsername.textContent = '@' + currentUser;
+        profileStatus.innerHTML = `<span style="color: #22c55e;">● Çevrim İçi</span>`;
       }
     }
 
@@ -749,15 +776,16 @@
         if (user !== currentUser) {
           let count = unreadCounts[user] || 0;
           let online = isUserOnline(user);
+          let displayName = getDisplayNameFor(user);
           
           html += `
             <div class="chat-item ${activeTarget === user ? 'active' : ''}" onclick="switchTab('chat'); selectChat('${user}');">
               <div class="chat-item-avatar">
-                ${user.charAt(0).toUpperCase()}
+                ${displayName.charAt(0).toUpperCase()}
                 <div class="status-dot ${online ? 'online' : 'offline'}"></div>
               </div>
               <div class="chat-item-info">
-                <div class="chat-item-name">${user.toUpperCase()}</div>
+                <div class="chat-item-name">${displayName.toUpperCase()}</div>
                 <div class="chat-item-lastmsg" style="color: ${online ? '#22c55e' : '#64748b'}">${online ? 'Çevrim İçi' : 'Çevrim Dışı'}</div>
               </div>
               ${count > 0 ? `<div class="unread-badge">${count}</div>` : ''}
@@ -827,6 +855,7 @@
       let html = '';
       messages.forEach((msg, index) => {
         const isMine = msg.user === currentUser;
+        const senderDisplayName = getDisplayNameFor(msg.user);
         html += `
           <div class="message-row ${isMine ? 'mine' : 'other'}">
             <div class="message-content-wrapper">
@@ -836,7 +865,7 @@
                 <button class="msg-action-btn delete" onclick="deleteMessage(${index})"><i class="fa-regular fa-trash-can"></i></button>
               </div>
             </div>
-            <div class="time-stamp">${msg.user.toUpperCase()} • ${msg.time}</div>
+            <div class="time-stamp">${senderDisplayName.toUpperCase()} • ${msg.time}</div>
           </div>
         `;
       });
